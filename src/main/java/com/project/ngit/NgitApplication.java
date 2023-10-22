@@ -22,7 +22,6 @@ public class NgitApplication {
 				String input = scanner.nextLine();
 				switch (input) {
 					case "ngit init" -> {
-						System.out.println("aaa");
 						makeFolder(".ngit");
 						makeFolder(".ngit/objects");
 						makeFolder(".ngit/index");
@@ -38,20 +37,19 @@ public class NgitApplication {
 	protected static void makeFolder(String folderName) {
 		Path dirPath = Paths.get(globalRepositoryPath + "/" +folderName);
 
-		if (directoryExists(folderName)) {
+		if (directoryExists(dirPath)) {
+			System.err.println("Already exists");
 			return;
 		}
 
 		try {
 			Files.createDirectory(dirPath);
-			System.out.println("Directory created successfully");
 		} catch (IOException e) {
 			System.err.println("Failed to create directory: " + e.getMessage());
 		}
 	}
 
-	public static boolean directoryExists(String dirPath) {
-		Path directory = Paths.get(dirPath);
+	public static boolean directoryExists(Path directory) {
 		return Files.exists(directory) && Files.isDirectory(directory);
 	}
 
