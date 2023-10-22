@@ -1,11 +1,16 @@
 package com.project.ngit;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.util.Objects;
 import java.util.Scanner;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.stream.Stream;
 
 public class NgitApplication {
 	static boolean isRunning = true;
@@ -55,24 +60,35 @@ public class NgitApplication {
 			System.out.println("No argument provided for add command.");
 			return;
 		}
-		
+		Path filePath = Path.of(GLOBAL_REPOSITORY_NAME + "/" + ".ngit");
+
 		if (argument.equals(".")) {
-			try (var stream = Files.walk(Path.of(GLOBAL_REPOSITORY_NAME + "/" + ".ngit"))) {
-				stream.forEach(System.out::println);
+			try (Stream<Path> stream = Files.walk(filePath)) {
+				stream.forEach(path -> {
+					FileTime lastModifiedTime = getLastModifiedTime(path);
+					System.out.println(path + " last modified: " + lastModifiedTime);
+				});
 			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			System.out.println(argument);
+                throw new RuntimeException(e);
+            }
+        } else {
+			FileTime lastModifiedTime = getLastModifiedTime(Path.of(filePath + "/" + argument));
 		}
 	}
-
-
 
 	private void initCommand() {
 		makeFolder(".ngit");
 		makeFolder(".ngit/objects");
 		makeFolder(".ngit/index");
+	}
+
+	public static FileTime getLastModifiedTime(Path path) {
+		try {
+			BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+			return attrs.lastModifiedTime();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	protected void makeFolder(String folderName) {
