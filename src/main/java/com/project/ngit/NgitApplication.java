@@ -21,17 +21,19 @@ public class NgitApplication {
 			while (isRunning) {
 				String input = scanner.nextLine();
 				switch (input) {
-					case "ngit init" -> {
-						makeFolder(".ngit");
-						makeFolder(".ngit/objects");
-						makeFolder(".ngit/index");
-					}
+					case "ngit init" -> initCommand();
 				}
 			}
 
 		} catch (Exception e) {
 			System.out.println(e);
 		}
+	}
+
+	private static void initCommand() {
+		makeFolder(".ngit");
+		makeFolder(".ngit/objects");
+		makeFolder(".ngit/index");
 	}
 
 	protected static void makeFolder(String folderName) {
