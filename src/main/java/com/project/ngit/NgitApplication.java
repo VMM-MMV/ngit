@@ -6,11 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
-import java.util.Objects;
 import java.util.Scanner;
-import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.stream.Stream;
 
 public class NgitApplication {
 	static boolean isRunning = true;
@@ -38,50 +35,19 @@ public class NgitApplication {
 	public void processCommand(String input) {
 		if (input.startsWith("ngit ")) {
 			String[] tokens = input.split(" ");
-
 			String command = tokens[1];
 			String argument = (tokens.length > 2) ? tokens[2] : null;
 
+			Runnable action = switch (command) {
+				case "init" -> () -> InitCommand.execute(GLOBAL_REPOSITORY_NAME);
+				case "add" -> () -> AddCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
+				default -> () -> System.out.println("Unknown command");
+			};
 
-			switch (command) {
-				case "init" -> initCommand();
-				case "add" -> addCommand(argument);
-				default -> System.out.println("Unknown command");
-			}
-
+			action.run();
 		} else {
 			System.out.println("Invalid command.");
 		}
-
-	}
-
-	private void addCommand(String argument) {
-		if (argument == null) {
-			System.out.println("No argument provided for add command.");
-			return;
-		}
-		Path ngitPath = Path.of(GLOBAL_REPOSITORY_NAME + "/" + ".ngit");
-
-		if (argument.equals(".")) {
-			try (Stream<Path> stream = Files.walk(ngitPath)) {
-				stream.forEach(path -> {
-					FileTime lastModifiedTime = getLastModifiedTime(path);
-					System.out.println(path + " last modified: " + lastModifiedTime);
-				});
-			} catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-			Path filePath = Path.of(ngitPath + "/" + argument);
-			FileTime lastModifiedTime = getLastModifiedTime(filePath);
-			System.out.println(ngitPath + " last modified: " + lastModifiedTime);
-		}
-	}
-
-	private void initCommand() {
-		makeFolder(".ngit");
-		makeFolder(".ngit/objects");
-		makeFolder(".ngit/index");
 	}
 
 	public static FileTime getLastModifiedTime(Path path) {
@@ -93,7 +59,7 @@ public class NgitApplication {
 		}
 	}
 
-	protected void makeFolder(String folderName) {
+	protected static void makeFolder(String folderName, String s) {
 		Path dirPath = Paths.get(GLOBAL_REPOSITORY_NAME + "/" +folderName);
 
 		if (directoryExists(dirPath)) {
@@ -108,7 +74,7 @@ public class NgitApplication {
 		}
 	}
 
-	public boolean directoryExists(Path directory) {
+	public static boolean directoryExists(Path directory) {
 		return Files.exists(directory) && Files.isDirectory(directory);
 	}
 
