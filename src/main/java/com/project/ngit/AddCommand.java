@@ -40,6 +40,7 @@ public class AddCommand {
             Path filePath = Path.of(ngitPath + "/" + argument);
             FileTime lastModifiedTime = NgitApplication.getLastModifiedTime(filePath);
             System.out.println(ngitPath + " last modified: " + lastModifiedTime);
+            jsonBuilder.add(filePath.toString(), lastModifiedTime.toString());
         }
         saveToJsonFile(ngitPath.resolve("index/changes.json"), jsonBuilder.build());
     }
@@ -63,8 +64,8 @@ public class AddCommand {
     private static void saveToJsonFile(Path filePath, JsonObject jsonContent) {
         try (StringWriter sw = new StringWriter();
              JsonWriter writer = Json.createWriter(sw)) {
-            writer.writeObject(jsonContent);
-            Files.write(filePath, sw.toString().getBytes());
+             writer.writeObject(jsonContent);
+             Files.write(filePath, sw.toString().getBytes());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
