@@ -60,10 +60,10 @@ public class NgitApplication {
 			System.out.println("No argument provided for add command.");
 			return;
 		}
-		Path filePath = Path.of(GLOBAL_REPOSITORY_NAME + "/" + ".ngit");
+		Path ngitPath = Path.of(GLOBAL_REPOSITORY_NAME + "/" + ".ngit");
 
 		if (argument.equals(".")) {
-			try (Stream<Path> stream = Files.walk(filePath)) {
+			try (Stream<Path> stream = Files.walk(ngitPath)) {
 				stream.forEach(path -> {
 					FileTime lastModifiedTime = getLastModifiedTime(path);
 					System.out.println(path + " last modified: " + lastModifiedTime);
@@ -72,7 +72,9 @@ public class NgitApplication {
                 throw new RuntimeException(e);
             }
         } else {
-			FileTime lastModifiedTime = getLastModifiedTime(Path.of(filePath + "/" + argument));
+			Path filePath = Path.of(ngitPath + "/" + argument);
+			FileTime lastModifiedTime = getLastModifiedTime(filePath);
+			System.out.println(ngitPath + " last modified: " + lastModifiedTime);
 		}
 	}
 
