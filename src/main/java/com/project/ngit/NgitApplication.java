@@ -4,25 +4,25 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class NgitApplication {
 	static boolean isRunning = true;
 
-	static String globalRepositoryPath = "/home/miguel/Desktop/Test";
+	static String GLOBAL_REPOSITORY_NAME = "/home/miguel/Desktop/Test";
 
 	public static void main(String[] args) {
-		cliLogic();
+		NgitApplication gitClone = new NgitApplication();
+		gitClone.cliLogic();
 	}
 
-	private static void cliLogic() {
+	private void cliLogic() {
 		try (Scanner scanner = new Scanner(System.in)) {
 
 			while (isRunning) {
 				String input = scanner.nextLine();
-				switch (input) {
-					case "ngit init" -> initCommand();
-				}
+				processCommand(input);
 			}
 
 		} catch (Exception e) {
@@ -30,14 +30,53 @@ public class NgitApplication {
 		}
 	}
 
-	private static void initCommand() {
+	public void processCommand(String input) {
+		if (input.startsWith("ngit ")) {
+			String[] tokens = input.split(" ");
+
+			String command = tokens[1];
+			String argument = (tokens.length > 2) ? tokens[2] : null;
+
+
+			switch (command) {
+				case "init" -> initCommand();
+				case "add" -> addCommand(argument);
+				default -> System.out.println("Unknown command");
+			}
+
+		} else {
+			System.out.println("Invalid command.");
+		}
+
+	}
+
+	private void addCommand(String argument) {
+		if (argument == null) {
+			System.out.println("No argument provided for add command.");
+			return;
+		}
+		
+		if (argument.equals(".")) {
+			try (var stream = Files.walk(Path.of(GLOBAL_REPOSITORY_NAME + "/" + ".ngit"))) {
+				stream.forEach(System.out::println);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			System.out.println(argument);
+		}
+	}
+
+
+
+	private void initCommand() {
 		makeFolder(".ngit");
 		makeFolder(".ngit/objects");
 		makeFolder(".ngit/index");
 	}
 
-	protected static void makeFolder(String folderName) {
-		Path dirPath = Paths.get(globalRepositoryPath + "/" +folderName);
+	protected void makeFolder(String folderName) {
+		Path dirPath = Paths.get(GLOBAL_REPOSITORY_NAME + "/" +folderName);
 
 		if (directoryExists(dirPath)) {
 			System.err.println("Already exists");
@@ -51,7 +90,7 @@ public class NgitApplication {
 		}
 	}
 
-	public static boolean directoryExists(Path directory) {
+	public boolean directoryExists(Path directory) {
 		return Files.exists(directory) && Files.isDirectory(directory);
 	}
 
