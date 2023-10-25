@@ -6,46 +6,29 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public class NgitApplication {
 	static boolean isRunning = true;
 
-	static String GLOBAL_REPOSITORY_NAME = "/home/miguel/Desktop/Test";
+	static String GLOBAL_REPOSITORY_NAME = System.getProperty("user.dir");
 
 	public static void main(String[] args) {
 		NgitApplication gitClone = new NgitApplication();
-		gitClone.cliLogic();
+		gitClone.processCommand(args);
 	}
 
-	private void cliLogic() {
-		try (Scanner scanner = new Scanner(System.in)) {
+	private void processCommand(String[] input) {
+		System.out.println(Arrays.toString(input));
+		String command = input[0];
+		String argument = (input.length >= 2) ? input[1] : null;
 
-			while (isRunning) {
-				String input = scanner.nextLine();
-				processCommand(input);
-			}
-
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-	}
-
-	private void processCommand(String input) {
-		if (input.startsWith("ngit ")) {
-			String[] tokens = input.split(" ");
-			String command = tokens[1];
-			String argument = (tokens.length > 2) ? tokens[2] : null;
-
-			switch (command) {
-				case "init" ->  InitCommand.execute(GLOBAL_REPOSITORY_NAME);
-				case "add" -> AddCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
-				default -> System.out.println("Unknown ngit command");
-			}
-
-		} else {
-			System.out.println("Invalid command.");
+		switch (command) {
+			case "init" ->  InitCommand.execute(GLOBAL_REPOSITORY_NAME);
+			case "add" -> AddCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
+			default -> System.out.println("Unknown ngit command");
 		}
 	}
 
