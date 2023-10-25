@@ -7,13 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
-import java.util.Scanner;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public class NgitApplication {
-	static boolean isRunning = true;
-
-	static String GLOBAL_REPOSITORY_NAME = System.getProperty("user.dir");
+	final static String GLOBAL_REPOSITORY_NAME = System.getProperty("user.dir");
 
 	public static void main(String[] args) {
 		NgitApplication gitClone = new NgitApplication();
@@ -41,8 +38,8 @@ public class NgitApplication {
 		}
 	}
 
-	protected static void makeFolder(String folderName, String s) {
-		Path dirPath = Paths.get(GLOBAL_REPOSITORY_NAME + "/" + folderName);
+	protected static void makeFolder(String folderName, String repositoryPath) {
+		Path dirPath = Paths.get(repositoryPath + "/" + folderName);
 
 		if (directoryExists(dirPath)) {
 			System.err.println("Already exists");

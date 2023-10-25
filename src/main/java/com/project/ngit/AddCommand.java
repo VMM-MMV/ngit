@@ -24,11 +24,13 @@ public class AddCommand {
 
         if (argument.equals(".")) {
             try (Stream<Path> stream = Files.walk(Path.of(repositoryPath))) {
+
                 stream.forEach(path -> {
                     FileTime lastModifiedTime = NgitApplication.getLastModifiedTime(path);
                     System.out.println(path + " last modified: " + lastModifiedTime);
                     existingData.put(path.toString(), lastModifiedTime.toString());
                 });
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -42,25 +44,25 @@ public class AddCommand {
     }
 
     private static Map<String, String> readExistingJsonData(Path filePath) {
-        Map<String, String> data = new LinkedHashMap<>();
-        if (!Files.exists(filePath)) {
-            return data;
-        }
-
-        try {
-            String content = new String(Files.readAllBytes(filePath));
-            String[] pairs = content.replace("{", "").replace("}", "").split(",");
-            for (String pair : pairs) {
-                String[] keyValue = pair.split(":");
-                if (keyValue.length == 2) {
-                    data.put(keyValue[0].trim().replace("\"", ""), keyValue[1].trim().replace("\"", ""));
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read existing JSON data", e);
-        }
+    Map<String, String> data = new LinkedHashMap<>();
+    if (!Files.exists(filePath)) {
         return data;
     }
+
+    try {
+        String content = new String(Files.readAllBytes(filePath));
+        String[] pairs = content.replace("{", "").replace("}", "").split(",");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split(":");
+            if (keyValue.length == 2) {
+                data.put(keyValue[0].trim().replace("\"", ""), keyValue[1].trim().replace("\"", ""));
+            }
+        }
+    } catch (IOException e) {
+        throw new RuntimeException("Failed to read existing JSON data", e);
+    }
+    return data;
+}
 
     private static void saveToJsonFile(Path filePath, Map<String, String> data) {
         StringBuilder sb = new StringBuilder("{");
