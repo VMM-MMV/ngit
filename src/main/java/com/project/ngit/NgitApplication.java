@@ -19,8 +19,9 @@ public class NgitApplication {
 
 	private void processCommand(String[] input) {
 		System.out.println(Arrays.toString(input));
+		if (input.length < 2) {return; }
 		String command = input[0];
-		String argument = (input.length >= 2) ? input[1] : null;
+		String argument = input[1];
 
 		switch (command) {
 			case "init" ->  InitCommand.execute(GLOBAL_REPOSITORY_NAME);
@@ -56,5 +57,4 @@ public class NgitApplication {
 	protected static boolean directoryExists(Path directory) {
 		return Files.exists(directory) && Files.isDirectory(directory);
 	}
-
 }
