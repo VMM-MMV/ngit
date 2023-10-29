@@ -37,7 +37,7 @@ public class SHA {
         return computeSHA(file);
     }
 
-    private static String getStringFromFile(String pathToFile) {
+    public static String getStringFromFile(String pathToFile) {
         try {
             return new String(Files.readAllBytes(Path.of(pathToFile)));
         } catch (IOException e) {

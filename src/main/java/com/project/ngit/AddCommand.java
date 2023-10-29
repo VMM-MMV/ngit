@@ -44,7 +44,7 @@ public class AddCommand {
     }
 
     private static void processPath(Path path) {
-        if (Files.isDirectory(path)) {
+        if (Files.isDirectory(path) || String.valueOf(path).contains(".ngit") || String.valueOf(path).contains(".git")) {
             return;
         }
 
@@ -58,8 +58,34 @@ public class AddCommand {
 
         NgitApplication.makeFile(fileSHA, filePath);
 
+        String fileContents = SHA.getStringFromFile(String.valueOf(path));
+        List<String> fileString = Arrays.asList(fileContents.split("\\R"));
+
+        writeToFile(fileSHA, filePath, fileString);
+
         FileStatus fileStatus = new FileStatus(path.toString(), filePath , lastModifiedTime.toString());
         existingData.add(fileStatus);
+    }
+
+    protected static void writeToFile(String fileName, String filePath, List<String> lines) {
+        Path absoluteFilePath = Path.of(filePath, fileName);
+        try {
+            Files.write(absoluteFilePath, lines, StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+            System.out.println("Data written to file: " + absoluteFilePath);
+        } catch (IOException e) {
+            System.err.println("An error occurred while writing to the file.");
+            e.printStackTrace();
+        }
+    }
+
+    private static List<String> getLinesOfFile(Path path) {
+        try {
+            return Files.readAllLines(path);
+        } catch (IOException e) {
+            System.out.println(path);
+            e.printStackTrace();
+            return Collections.singletonList("");
+        }
     }
 
     private static List<FileStatus> readExistingData(Path filePath) {

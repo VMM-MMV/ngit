@@ -59,15 +59,13 @@ public class NgitApplication {
 		Path parentDirPath = Path.of(filePath);
 		Path absoluteFilePath = parentDirPath.resolve(fileName);
 
+		if (Files.exists(absoluteFilePath)) {
+			return;
+		}
+
 		try {
 			Files.createDirectories(parentDirPath);
-
-			if (!Files.exists(absoluteFilePath)) {
-				Files.createFile(absoluteFilePath);
-				System.out.println("File created: " + absoluteFilePath);
-			} else {
-				System.out.println("File already exists: " + absoluteFilePath);
-			}
+			Files.createFile(absoluteFilePath);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
