@@ -44,9 +44,13 @@ public class AddCommand {
     }
 
     private static void processPath(Path path) {
+        if (Files.isDirectory(path)) {
+            return;
+        }
+
         FileTime lastModifiedTime = NgitApplication.getLastModifiedTime(path);
-        System.out.println(path + " last modified: " + lastModifiedTime);
-        FileStatus fileStatus = new FileStatus(path.toString(), path.getFileName().toString(), lastModifiedTime.toString());
+
+        FileStatus fileStatus = new FileStatus(path.toString(), SHA.fileToSHA(String.valueOf(path)), lastModifiedTime.toString());
         existingData.add(fileStatus);
     }
 
@@ -69,4 +73,6 @@ public class AddCommand {
             throw new RuntimeException(e);
         }
     }
+
+
 }
