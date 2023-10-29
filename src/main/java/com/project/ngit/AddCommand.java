@@ -50,7 +50,15 @@ public class AddCommand {
 
         FileTime lastModifiedTime = NgitApplication.getLastModifiedTime(path);
 
-        FileStatus fileStatus = new FileStatus(path.toString(), SHA.fileToSHA(String.valueOf(path)), lastModifiedTime.toString());
+        String shaOfFile = SHA.fileToSHA(String.valueOf(path));
+        String folderSHA = shaOfFile.substring(0, 2);
+        String fileSHA = shaOfFile.substring(2);
+
+        String filePath = ngitPath + "\\objects" + "\\" + folderSHA;
+
+        NgitApplication.makeFile(fileSHA, filePath);
+
+        FileStatus fileStatus = new FileStatus(path.toString(), filePath , lastModifiedTime.toString());
         existingData.add(fileStatus);
     }
 
@@ -73,6 +81,4 @@ public class AddCommand {
             throw new RuntimeException(e);
         }
     }
-
-
 }
