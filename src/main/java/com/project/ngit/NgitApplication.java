@@ -45,7 +45,6 @@ public class NgitApplication {
 		Path dirPath = Paths.get(repositoryPath + "/" + folderName);
 
 		if (directoryExists(dirPath)) {
-			System.err.println("Already exists");
 			return;
 		}
 
@@ -55,6 +54,25 @@ public class NgitApplication {
 			System.err.println("Failed to create directory: " + e.getMessage());
 		}
 	}
+
+	protected static void makeFile(String fileName, String filePath) {
+		Path parentDirPath = Path.of(filePath);
+		Path absoluteFilePath = parentDirPath.resolve(fileName);
+
+		try {
+			Files.createDirectories(parentDirPath);
+
+			if (!Files.exists(absoluteFilePath)) {
+				Files.createFile(absoluteFilePath);
+				System.out.println("File created: " + absoluteFilePath);
+			} else {
+				System.out.println("File already exists: " + absoluteFilePath);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 
 	protected static boolean directoryExists(Path directory) {
 		return Files.exists(directory) && Files.isDirectory(directory);
