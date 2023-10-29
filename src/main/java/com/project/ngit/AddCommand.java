@@ -44,34 +44,20 @@ public class AddCommand {
     }
 
     private static void processPath(Path path) {
-        if (Files.isDirectory(path) || String.valueOf(path).contains(".ngit") || String.valueOf(path).contains(".git")) {
+        if (String.valueOf(path).contains(".ngit") || String.valueOf(path).contains(".git")) {
             return;
         }
 
         FileTime lastModifiedTime = NgitApplication.getLastModifiedTime(path);
 
-        String shaOfFile = SHA.fileToSHA(String.valueOf(path));
-        String folderSHA = shaOfFile.substring(0, 2);
-        String fileSHA = shaOfFile.substring(2);
+        String gitObjectPath = null;
+        if (Files.isDirectory(path)) {
 
-        String filePath = ngitPath + "\\objects" + "\\" + folderSHA;
-
-        NgitApplication.makeFile(fileSHA, filePath);
-
-        String fileContents = SHA.getStringFromFile(String.valueOf(path));
-
-        String compressedContents;
-        try {
-            compressedContents = Zlib.compress(fileContents);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } else {
+            gitObjectPath =  addBlob(String.valueOf(path));
         }
 
-        List<String> fileString = Collections.singletonList(compressedContents);
-
-        writeToFile(fileSHA, filePath, fileString);
-
-        FileStatus fileStatus = new FileStatus(path.toString(), filePath , lastModifiedTime.toString());
+        FileStatus fileStatus = new FileStatus(path.toString(), gitObjectPath , lastModifiedTime.toString());
         existingData.add(fileStatus);
     }
 
@@ -86,14 +72,24 @@ public class AddCommand {
         }
     }
 
-    private static List<String> getLinesOfFile(Path path) {
-        try {
-            return Files.readAllLines(path);
-        } catch (IOException e) {
-            System.out.println(path);
-            e.printStackTrace();
-            return Collections.singletonList("");
-        }
+    private static String addBlob(String path) {
+        String shaOfFile = SHA.fileToSHA(path);
+        String folderSHA = shaOfFile.substring(0, 2);
+        String fileSHA = shaOfFile.substring(2);
+
+        String filePath = ngitPath + "\\objects" + "\\" + folderSHA;
+
+        NgitApplication.makeFile(fileSHA, filePath);
+
+
+        String fileContents = SHA.getStringFromFile(path);
+
+        String compressedContents = Zlib.compress(fileContents);
+
+        List<String> fileString = Collections.singletonList(compressedContents);
+
+        writeToFile(fileSHA, filePath, fileString);
+        return filePath;
     }
 
     private static List<FileStatus> readExistingData(Path filePath) {
