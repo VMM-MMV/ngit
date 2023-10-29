@@ -59,7 +59,15 @@ public class AddCommand {
         NgitApplication.makeFile(fileSHA, filePath);
 
         String fileContents = SHA.getStringFromFile(String.valueOf(path));
-        List<String> fileString = Arrays.asList(fileContents.split("\\R"));
+
+        String compressedContents;
+        try {
+            compressedContents = Zlib.compress(fileContents);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        List<String> fileString = Collections.singletonList(compressedContents);
 
         writeToFile(fileSHA, filePath, fileString);
 
