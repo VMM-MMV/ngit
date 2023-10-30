@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 public class AddCommand {
     static Path ngitPath;
     static String repositoryPath;
-    static List<FileStatus> existingData = new ArrayList<>();
+    static Map<String, FileStatus> existingData = new HashMap<>();
 
     public static void execute(String repositoryPath, String argument) {
         if (argument == null) {
@@ -44,21 +44,18 @@ public class AddCommand {
     }
 
     private static void processPath(Path path) {
-        if (String.valueOf(path).contains(".ngit") || String.valueOf(path).contains(".git")) {
+        if (Files.isDirectory(path) || String.valueOf(path).contains(".ngit") || String.valueOf(path).contains(".git")) {
             return;
         }
 
         FileTime lastModifiedTime = NgitApplication.getLastModifiedTime(path);
 
-        String gitObjectPath = null;
-        if (Files.isDirectory(path)) {
 
-        } else {
-            gitObjectPath =  addBlob(String.valueOf(path));
-        }
+        String gitObjectPath = addBlob(String.valueOf(path));
 
-        FileStatus fileStatus = new FileStatus(path.toString(), gitObjectPath , lastModifiedTime.toString());
-        existingData.add(fileStatus);
+
+        FileStatus fileStatus = new FileStatus(gitObjectPath , lastModifiedTime.toString());
+        existingData.put(path.toString(), fileStatus);
     }
 
     protected static void writeToFile(String fileName, String filePath, List<String> lines) {
@@ -81,7 +78,6 @@ public class AddCommand {
 
         NgitApplication.makeFile(fileSHA, filePath);
 
-
         String fileContents = SHA.getStringFromFile(path);
 
         String compressedContents = Zlib.compress(fileContents);
@@ -89,22 +85,22 @@ public class AddCommand {
         List<String> fileString = Collections.singletonList(compressedContents);
 
         writeToFile(fileSHA, filePath, fileString);
-        return filePath;
+        return filePath + "\\" + fileSHA;
     }
 
-    private static List<FileStatus> readExistingData(Path filePath) {
+    static Map<String, FileStatus> readExistingData(Path filePath) {
         if (!Files.exists(filePath)) {
-            return new ArrayList<>();
+            return new HashMap<>();
         }
 
         try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(filePath))) {
-            return (List<FileStatus>) ois.readObject();
+            return (Map<String, FileStatus>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Failed to read existing data", e);
         }
     }
 
-    private static void saveDataToFile(Path filePath, List<FileStatus> data) {
+    private static void saveDataToFile(Path filePath, Map<String, FileStatus> data) {
         try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(filePath))) {
             oos.writeObject(data);
         } catch (IOException e) {
