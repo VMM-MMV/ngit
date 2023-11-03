@@ -58,11 +58,13 @@ public class DirectoryLister {
 
         StringBuilder directoryContentsHash = new StringBuilder();
 
+        List<TreeStatus> treeInfo = new ArrayList<>();
+
         for (File file : files) {
             String filePath = file.getAbsolutePath();
             if (existingData.containsKey(filePath)) {
                 FileStatus fileStatus = existingData.get(filePath);
-
+                treeInfo.add(new TreeStatus("", fileStatus.fileHash()));
                 directoryContentsHash.append(fileStatus.fileHash());//TO DO change path to relative path not absolute
 //                System.out.println("File: " + filePath + " - Status: " + fileStatus.fileHash());
             }
@@ -72,11 +74,11 @@ public class DirectoryLister {
             System.out.println(directoryContentsHash);
             var s = SHA.computeSHA(String.valueOf(directoryContentsHash));
             System.out.println(s);
-            addBlob(s);
+            addBlob(s, treeInfo);
         }
     }
 
-    private static String addBlob(String shaOfDirectory) {
+    private static String addBlob(String shaOfDirectory, List<TreeStatus> statusOfTree) {
         String folderSHA = shaOfDirectory.substring(0, 2);
         String fileSHA = shaOfDirectory.substring(2);
 
@@ -84,9 +86,7 @@ public class DirectoryLister {
 
         NgitApplication.makeFile(fileSHA, filePath);
 
-        String fileContents = "ssss";
-
-        List<String> fileString = Collections.singletonList(fileContents);
+        List<String> fileString = Collections.singletonList(statusOfTree.toString());
 
         writeToFile(fileSHA, filePath, fileString);
         return filePath + "\\" + fileSHA;
