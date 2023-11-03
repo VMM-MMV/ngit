@@ -46,16 +46,19 @@ public class DirectoryLister {
 
         Map<String, FileStatus> existingData = readExistingData(ngitPath.resolve("index/changes.ser"));
         List<File> directories = listDirectories(repositoryPath);
-
+        
+        String lastTree = null;
         for (File directory : directories) {
-            makeOneTree(directory, existingData);
+            lastTree = makeOneTree(directory, existingData);
         }
+
+        System.out.println(lastTree);
     }
 
-    public static void makeOneTree(File directory, Map<String, FileStatus> existingData) {
+    public static String makeOneTree(File directory, Map<String, FileStatus> existingData) {
         File[] files = directory.listFiles();
         if (files == null) {
-            return;
+            return null;
         }
 
         StringBuilder directoryContentsHash = new StringBuilder();
@@ -77,7 +80,9 @@ public class DirectoryLister {
             String shaOfDirectoryContents = SHA.computeSHA(String.valueOf(directoryContentsHash));
             System.out.println(shaOfDirectoryContents);
             addBlob(shaOfDirectoryContents, treeInfo);
+            return shaOfDirectoryContents;
         }
+        return null;
     }
 
     private static String addBlob(String shaOfDirectory, List<TreeStatus> statusOfTree) {
