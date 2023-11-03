@@ -64,28 +64,24 @@ public class DirectoryLister {
         List<TreeStatus> treeInfo = new ArrayList<>();
 
         for (File file : files) {
-            System.out.println(file);
             String filePath = file.getAbsolutePath();
             if (existingData.containsKey(filePath)) {
                 FileStatus fileStatus = existingData.get(filePath);
-                System.out.println(fileStatus);
-                treeInfo.add(new TreeStatus(fileStatus.name(), fileStatus.fileHash()));
+                String objectType = file.isDirectory() ? "tree" : "blob";
+                treeInfo.add(new TreeStatus(fileStatus.name(), fileStatus.fileHash(), objectType));
+
                 directoryContentsHash.append(fileStatus.fileHash());
             }
         }
 
         if (directoryContentsHash.length() != 0) {
             String shaOfDirectoryContents = SHA.computeSHA(directoryContentsHash.toString());
-            String treeObjectPath = addBlob(shaOfDirectoryContents, treeInfo);
-
-            long lastModifiedTime = directory.lastModified();
-            FileStatus directoryStatus = new FileStatus(directory.getName(), treeObjectPath, new Date(lastModifiedTime).toString());
-            existingData.put(directory.getAbsolutePath(), directoryStatus);
-
-            return shaOfDirectoryContents;
+            addBlob(shaOfDirectoryContents, treeInfo);
+            return shaOfDirectoryContents; // Append '.tree' if you wish to keep the extension convention
         }
         return null;
     }
+
 
 
     private static String addBlob(String shaOfDirectory, List<TreeStatus> statusOfTree) {
