@@ -10,6 +10,7 @@ import java.util.*;
 import static com.project.ngit.AddCommand.readExistingData;
 
 public class DirectoryLister {
+    static Path ngitPath;
     public static List<File> listDirectories(String rootDirectoryPath) {
         File rootDirectory = new File(rootDirectoryPath);
         if (!rootDirectory.isDirectory()) {
@@ -41,16 +42,17 @@ public class DirectoryLister {
     }
 
     public static void makeTrees(String repositoryPath) {
-        Path ngitPath = Path.of(repositoryPath, ".ngit");
+        DirectoryLister.ngitPath = Path.of(repositoryPath, ".ngit");
+
         Map<String, FileStatus> existingData = readExistingData(ngitPath.resolve("index/changes.ser"));
         List<File> directories = listDirectories(repositoryPath);
+
         for (File directory : directories) {
-            checkFiles(directory, existingData);
+            makeOneTree(directory, existingData);
         }
-        System.out.println(existingData);
     }
 
-    public static void checkFiles(File directory, Map<String, FileStatus> existingData) {
+    public static void makeOneTree(File directory, Map<String, FileStatus> existingData) {
         File[] files = directory.listFiles();
         if (files == null) {
             return;
@@ -65,16 +67,16 @@ public class DirectoryLister {
             if (existingData.containsKey(filePath)) {
                 FileStatus fileStatus = existingData.get(filePath);
                 treeInfo.add(new TreeStatus("", fileStatus.fileHash()));
+
                 directoryContentsHash.append(fileStatus.fileHash());//TO DO change path to relative path not absolute
-//                System.out.println("File: " + filePath + " - Status: " + fileStatus.fileHash());
             }
         }
 
         if(directoryContentsHash.length() != 0) {
             System.out.println(directoryContentsHash);
-            var s = SHA.computeSHA(String.valueOf(directoryContentsHash));
-            System.out.println(s);
-            addBlob(s, treeInfo);
+            String shaOfDirectoryContents = SHA.computeSHA(String.valueOf(directoryContentsHash));
+            System.out.println(shaOfDirectoryContents);
+            addBlob(shaOfDirectoryContents, treeInfo);
         }
     }
 
@@ -82,32 +84,18 @@ public class DirectoryLister {
         String folderSHA = shaOfDirectory.substring(0, 2);
         String fileSHA = shaOfDirectory.substring(2);
 
-        String filePath = "C:\\Users\\Mihai Vieru\\ngit2\\.ngit" + "\\objects" + "\\" + folderSHA;
+        String filePath = ngitPath + "\\objects" + "\\" + folderSHA;
 
         NgitApplication.makeFile(fileSHA, filePath);
 
         List<String> fileString = Collections.singletonList(statusOfTree.toString());
 
-        writeToFile(fileSHA, filePath, fileString);
+        AddCommand.writeToFile(fileSHA, filePath, fileString);
         return filePath + "\\" + fileSHA;
     }
 
-    protected static void writeToFile(String fileName, String filePath, List<String> lines) {
-        Path absoluteFilePath = Path.of(filePath, fileName);
-        try {
-            Files.write(absoluteFilePath, lines, StandardOpenOption.APPEND, StandardOpenOption.CREATE);
-            System.out.println("Data written to file: " + absoluteFilePath);
-        } catch (IOException e) {
-            System.err.println("An error occurred while writing to the file.");
-            e.printStackTrace();
-        }
-    }
 
     public static void main(String[] args) {
-//        File rootDirectory = new File("C:\\Users\\Miguel\\IdeaProjects\\ngit2");
-//        List<File> directories = listDirectories(rootDirectory);
-//        Collections.reverse(directories);
-//        System.out.println(directories);
         makeTrees("C:\\Users\\Mihai Vieru\\ngit2");
     }
 }
