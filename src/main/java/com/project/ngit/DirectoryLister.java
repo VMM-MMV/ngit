@@ -36,6 +36,7 @@ public class DirectoryLister {
         }
         return directories;
     }
+
     public static void makeTrees(String repositoryPath) {
         Path ngitPath = Path.of(repositoryPath, ".ngit");
         Map<String, FileStatus> existingData = readExistingData(ngitPath.resolve("index/changes.ser"));
@@ -63,9 +64,12 @@ public class DirectoryLister {
                 System.out.println("File: " + filePath + " - Status: " + fileStatus.fileHash());
             }
         }
-        System.out.println(directoryContentsHash);
-        var s = SHA.computeSHA(String.valueOf(directoryContentsHash));
-        System.out.println(s);
+
+        if(directoryContentsHash.length() != 0) {
+            System.out.println(directoryContentsHash);
+            var s = SHA.computeSHA(String.valueOf(directoryContentsHash));
+            System.out.println(s);
+        }
     }
 
     public static void main(String[] args) {
@@ -73,6 +77,6 @@ public class DirectoryLister {
 //        List<File> directories = listDirectories(rootDirectory);
 //        Collections.reverse(directories);
 //        System.out.println(directories);
-        makeTrees("C:\\Users\\Miguel\\IdeaProjects\\ngit2");
+        makeTrees("C:\\Users\\Mihai Vieru\\ngit2");
     }
 }
