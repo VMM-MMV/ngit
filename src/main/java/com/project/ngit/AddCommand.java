@@ -54,14 +54,14 @@ public class AddCommand {
         String gitObjectPath = addBlob(String.valueOf(path));
 
 
-        FileStatus fileStatus = new FileStatus(gitObjectPath , lastModifiedTime.toString());
+        FileStatus fileStatus = new FileStatus(path.getFileName().toString(), gitObjectPath , lastModifiedTime.toString());
         existingData.put(path.toString(), fileStatus);
     }
 
     protected static void writeToFile(String fileName, String filePath, List<String> lines) {
         Path absoluteFilePath = Path.of(filePath, fileName);
         try {
-            Files.write(absoluteFilePath, lines, StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+            Files.write(absoluteFilePath, lines, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             System.out.println("Data written to file: " + absoluteFilePath);
         } catch (IOException e) {
             System.err.println("An error occurred while writing to the file.");

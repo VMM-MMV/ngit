@@ -69,9 +69,9 @@ public class DirectoryLister {
             String filePath = file.getAbsolutePath();
             if (existingData.containsKey(filePath)) {
                 FileStatus fileStatus = existingData.get(filePath);
-                treeInfo.add(new TreeStatus("", fileStatus.fileHash()));
+                treeInfo.add(new TreeStatus(fileStatus.name(), fileStatus.fileHash()));
 
-                directoryContentsHash.append(fileStatus.fileHash());//TO DO change path to relative path not absolute
+                directoryContentsHash.append(fileStatus.fileHash()); //TO DO change path to relative path not absolute
             }
         }
 
