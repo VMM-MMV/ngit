@@ -1,7 +1,10 @@
 package com.project.ngit;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 import static com.project.ngit.AddCommand.readExistingData;
@@ -61,7 +64,7 @@ public class DirectoryLister {
                 FileStatus fileStatus = existingData.get(filePath);
 
                 directoryContentsHash.append(fileStatus.fileHash());//TO DO change path to relative path not absolute
-                System.out.println("File: " + filePath + " - Status: " + fileStatus.fileHash());
+//                System.out.println("File: " + filePath + " - Status: " + fileStatus.fileHash());
             }
         }
 
@@ -69,6 +72,34 @@ public class DirectoryLister {
             System.out.println(directoryContentsHash);
             var s = SHA.computeSHA(String.valueOf(directoryContentsHash));
             System.out.println(s);
+            addBlob(s);
+        }
+    }
+
+    private static String addBlob(String shaOfDirectory) {
+        String folderSHA = shaOfDirectory.substring(0, 2);
+        String fileSHA = shaOfDirectory.substring(2);
+
+        String filePath = "C:\\Users\\Mihai Vieru\\ngit2\\.ngit" + "\\objects" + "\\" + folderSHA;
+
+        NgitApplication.makeFile(fileSHA, filePath);
+
+        String fileContents = "ssss";
+
+        List<String> fileString = Collections.singletonList(fileContents);
+
+        writeToFile(fileSHA, filePath, fileString);
+        return filePath + "\\" + fileSHA;
+    }
+
+    protected static void writeToFile(String fileName, String filePath, List<String> lines) {
+        Path absoluteFilePath = Path.of(filePath, fileName);
+        try {
+            Files.write(absoluteFilePath, lines, StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+            System.out.println("Data written to file: " + absoluteFilePath);
+        } catch (IOException e) {
+            System.err.println("An error occurred while writing to the file.");
+            e.printStackTrace();
         }
     }
 
