@@ -83,6 +83,7 @@ public class DirectoryLister {
             existingData.put(String.valueOf(directory), new FileStatus(directory.getName(),shaOfDirectoryContents,"sss"));
             return shaOfDirectoryContents;
         }
+
         return null;
     }
 
