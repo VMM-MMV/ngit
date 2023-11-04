@@ -3,6 +3,8 @@ package com.project.ngit;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
+import java.io.*;
+import java.nio.file.*;
 
 import static com.project.ngit.AddCommand.readExistingData;
 
@@ -67,6 +69,7 @@ public class DirectoryLister {
             String filePath = file.getAbsolutePath();
             if (existingData.containsKey(filePath)) {
                 FileStatus fileStatus = existingData.get(filePath);
+                System.out.println(fileStatus.name());
                 String objectType = file.isDirectory() ? "tree" : "blob";
                 treeInfo.add(new TreeStatus(fileStatus.name(), fileStatus.fileHash(), objectType));
 
@@ -76,33 +79,35 @@ public class DirectoryLister {
 
         if (directoryContentsHash.length() != 0) {
             String shaOfDirectoryContents = SHA.computeSHA(directoryContentsHash.toString());
-            addBlob(shaOfDirectoryContents, treeInfo);
-            return shaOfDirectoryContents; // Append '.tree' if you wish to keep the extension convention
+            writeTree(shaOfDirectoryContents, treeInfo);
+            existingData.put(String.valueOf(directory), new FileStatus(directory.getName(),shaOfDirectoryContents,"sss"));
+            return shaOfDirectoryContents;
         }
         return null;
     }
 
+    protected static String writeTree(String shaOfDirectoryContents, List<TreeStatus> treeInfo) {
+        String folderSHA = shaOfDirectoryContents.substring(0, 2);
+        String fileSHA = shaOfDirectoryContents.substring(2);
 
-
-    private static String addBlob(String shaOfDirectory, List<TreeStatus> statusOfTree) {
-        String folderSHA = shaOfDirectory.substring(0, 2);
-        String fileSHA = shaOfDirectory.substring(2);
-
-        String filePath = ngitPath + File.separator + "objects" + File.separator + folderSHA;
+        String filePath = ngitPath.resolve("objects").resolve(folderSHA).toString();
         File directory = new File(filePath);
 
-        if (!directory.exists()) {
-            directory.mkdirs();
+        if (!directory.exists() && !directory.mkdirs()) {
+            throw new IllegalStateException("Could not create directory: " + directory);
         }
 
-        String fullFilePath = filePath + File.separator + fileSHA;
-        List<String> fileString = Collections.singletonList(statusOfTree.toString());
+        String fullFilePath = Paths.get(filePath, fileSHA).toString();
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fullFilePath))) {
+            oos.writeObject(treeInfo);
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurred while writing the tree to the file: " + fullFilePath, e);
+        }
 
-        AddCommand.writeToFile(fileSHA, filePath, fileString);
         return fullFilePath;
     }
 
     public static void main(String[] args) {
-        makeTrees("C:\\Users\\Mihai Vieru\\ngit2");
+        makeTrees("C:\\Users\\Miguel\\IdeaProjects\\ngit2");
     }
 }
