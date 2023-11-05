@@ -11,7 +11,7 @@ public class CheckoutCommand {
     private static String NGIT_PATH;
     public static void execute(String repositoryPath, String hash) {
         NGIT_PATH = repositoryPath + "\\.ngit";
-        createFilesRecursively(hash, new File("C:\\Users\\Miguel\\IdeaProjects\\ngit2\\output"));
+        createFilesRecursively(hash, new File(repositoryPath));
     }
 
     public static void createFilesRecursively(String shaOfDirectoryContents, File parentDirectory) {

@@ -10,11 +10,10 @@ import java.nio.file.*;
 import static com.project.ngit.AddCommand.*;
 
 public class CommitCommand {
-    static Path ngitPath = Path.of("C:\\Users\\Miguel\\IdeaProjects\\ngit2\\.ngit");
-    static Path objectsPath = Path.of(ngitPath + "\\objects");
+    static Path objectsPath;
     static String headTree;
-    static String repositoryPath = "C:\\Users\\Miguel\\IdeaProjects\\ngit2\\.ngit";
-    static Map<String, FileStatus> existingData = readExistingData(ngitPath.resolve("index/changes.ser"));;
+    static String repositoryPath;
+    static Map<String, FileStatus> existingData;
 
     public List<File> listOfDirectories(String rootDirectoryPath) {
         File rootDirectory = new File(rootDirectoryPath);
@@ -119,7 +118,7 @@ public class CommitCommand {
     }
 
     private void makeCommit() {
-        String directoryPath = repositoryPath + "\\heads";
+        String directoryPath = ngitPath + "\\heads";
         try {
             if (isDirectoryEmpty(directoryPath)) {
                 createFileInDirectory(directoryPath, "master", makeCommitBlob(null));
@@ -221,7 +220,11 @@ public class CommitCommand {
     }
 
 
-    public static void main(String[] args) {
+    public static void execute(String repositoryPath){
+        CommitCommand.repositoryPath = repositoryPath;
+        ngitPath = Path.of(repositoryPath + "\\.ngit\\");
+        objectsPath = Path.of(ngitPath + "\\objects");
+        existingData = readExistingData(ngitPath.resolve("index/changes.ser"));
         CommitCommand commitCommand = new CommitCommand();
         commitCommand.updateChangedFiles();
         commitCommand.makeTrees();

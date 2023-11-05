@@ -52,7 +52,7 @@ public class AddCommand {
 
         FileTime lastModifiedTime = NgitApplication.getLastModifiedTime(path);
 
-        String gitObjectHash = null;
+        String gitObjectHash;
         try {
             gitObjectHash = addBlob(String.valueOf(ngitPath), String.valueOf(path));
         } catch (IOException e) {
