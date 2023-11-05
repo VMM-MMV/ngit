@@ -23,7 +23,9 @@ public class NgitApplication {
 		if (input.length < 1) {return; }
 
 		String command = input[0];
-		String argument = (input.length > 1) ? input[1] : null;
+		String argument = (input.length > 1)
+					      ? String.join(" ", Arrays.copyOfRange(input, 1, input.length))
+					      : null;
 
 		switch (command) {
 			case "init" ->  InitCommand.execute(GLOBAL_REPOSITORY_NAME);
