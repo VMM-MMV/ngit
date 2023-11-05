@@ -96,7 +96,6 @@ public class CommitCommand {
         return SHA.computeSHA(directoryContentsHash.toString());
     }
 
-
     protected static void writeTree(String shaOfDirectoryContents, List<TreeStatus> treeInfo) {
         String folderSHA = shaOfDirectoryContents.substring(0, 2);
         String fileSHA = shaOfDirectoryContents.substring(2);
@@ -121,27 +120,35 @@ public class CommitCommand {
         String directoryPath = repositoryPath + "\\heads";
         try {
             if (isDirectoryEmpty(directoryPath)) {
-                createFileInDirectory(directoryPath, "master", makeCommitBlob());
+                createFileInDirectory(directoryPath, "master", makeCommitBlob(null));
                 createFileInDirectory(directoryPath, "HEAD", "master");
             } else {
-                System.out.println("Directory is not empty.");
+                String currentBranch = SHA.getStringFromFile(directoryPath + "\\HEAD");
+                String currentCommitSHA = SHA.getStringFromFile(directoryPath + "\\" + currentBranch);
+                var commitContents = loadCommitStatus(objectsPath + "\\" + currentCommitSHA.substring(0,2) + "\\" + currentCommitSHA.substring(2));
+                System.out.println(commitContents);
+                String shaOfNewCommit = makeCommitBlob(commitContents.currentCommit());
+                System.out.println(shaOfNewCommit);
+
+                createFileInDirectory(directoryPath, currentBranch, shaOfNewCommit);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private String makeCommitBlob() {
+    private String makeCommitBlob(String pastObjectPath) {
         String commitSHA = SHA.computeSHA(headTree);
         String gitObjectDirectory = commitSHA.substring(0, 2);
         String gitObjectName = commitSHA.substring(2);
 
         String gitObjectDir = objectsPath + "\\" + gitObjectDirectory;
-        String gitObjectPath = gitObjectDir + "\\" + gitObjectName;
 
         NgitApplication.makeFolder("", gitObjectDir);
 
-        saveCommitStatus(gitObjectDir, new CommitStatus(gitObjectPath, null, System.getProperty("user.name"), "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), gitObjectName);
+        if (!commitSHA.equals(pastObjectPath)) {
+            saveCommitStatus(gitObjectDir, new CommitStatus(commitSHA, pastObjectPath, System.getProperty("user.name"), headTree,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), gitObjectName);
+        }
         return commitSHA;
     }
 
