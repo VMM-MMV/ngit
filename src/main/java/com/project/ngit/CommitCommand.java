@@ -117,11 +117,11 @@ public class CommitCommand {
         }
     }
 
-    private void makeCommit() {
+    private void makeCommit(String commitMessage) {
         String directoryPath = ngitPath + "\\heads";
         try {
             if (isDirectoryEmpty(directoryPath)) {
-                createFileInDirectory(directoryPath, "master", makeCommitBlob(null));
+                createFileInDirectory(directoryPath, "master", makeCommitBlob(null, commitMessage));
                 createFileInDirectory(directoryPath, "HEAD", "master");
             } else {
                 String currentBranch = SHA.getStringFromFile(directoryPath + "\\HEAD");
@@ -129,7 +129,7 @@ public class CommitCommand {
 
                 var commitContents = loadCommitStatus(objectsPath + "\\" + currentCommitSHA.substring(0,2) + "\\" + currentCommitSHA.substring(2));
                 System.out.println(commitContents);
-                String shaOfNewCommit = makeCommitBlob(commitContents.currentCommit());
+                String shaOfNewCommit = makeCommitBlob(commitContents.currentCommit(), commitMessage);
                 createFileInDirectory(directoryPath, currentBranch, shaOfNewCommit);
             }
         } catch (IOException e) {
@@ -137,7 +137,7 @@ public class CommitCommand {
         }
     }
 
-    private String makeCommitBlob(String pastObjectPath) {
+    private String makeCommitBlob(String pastObjectPath, String commitMessage) {
         String commitSHA = SHA.computeSHA(headTree);
         String gitObjectDirectory = commitSHA.substring(0, 2);
         String gitObjectName = commitSHA.substring(2);
@@ -147,7 +147,7 @@ public class CommitCommand {
         NgitApplication.makeFolder("", gitObjectDir);
 
         if (!commitSHA.equals(pastObjectPath)) {
-            saveCommitStatus(gitObjectDir, new CommitStatus(commitSHA, pastObjectPath, System.getProperty("user.name"), headTree,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), gitObjectName);
+            saveCommitStatus(gitObjectDir, new CommitStatus(commitSHA, pastObjectPath, System.getProperty("user.name"), headTree,commitMessage), gitObjectName);
         }
         return commitSHA;
     }
@@ -220,7 +220,7 @@ public class CommitCommand {
     }
 
 
-    public static void execute(String repositoryPath){
+    public static void execute(String repositoryPath, String commitMessage){
         CommitCommand.repositoryPath = repositoryPath;
         ngitPath = Path.of(repositoryPath + "\\.ngit\\");
         objectsPath = Path.of(ngitPath + "\\objects");
@@ -228,6 +228,6 @@ public class CommitCommand {
         CommitCommand commitCommand = new CommitCommand();
         commitCommand.updateChangedFiles();
         commitCommand.makeTrees();
-        commitCommand.makeCommit();
+        commitCommand.makeCommit(commitMessage);
     }
 }

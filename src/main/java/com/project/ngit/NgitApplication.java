@@ -29,7 +29,7 @@ public class NgitApplication {
 			case "init" ->  InitCommand.execute(GLOBAL_REPOSITORY_NAME);
 			case "add" -> AddCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
 			case "checkout" -> CheckoutCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
-			case "commit" -> CommitCommand.execute(GLOBAL_REPOSITORY_NAME);
+			case "commit" -> CommitCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
 			case "log" -> LogCommand.execute(GLOBAL_REPOSITORY_NAME);
 			default -> System.out.println("Unknown ngit command");
 		}
