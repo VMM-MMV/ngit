@@ -5,6 +5,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.util.stream.Stream;
+import java.util.zip.Deflater;
 
 public class AddCommand {
     static Path ngitPath;
@@ -50,42 +51,47 @@ public class AddCommand {
 
         FileTime lastModifiedTime = NgitApplication.getLastModifiedTime(path);
 
+        String gitObjectHash = null;
+        try {
+            gitObjectHash = addBlob(String.valueOf(path));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        String gitObjectPath = addBlob(String.valueOf(path));
-
-
-        FileStatus fileStatus = new FileStatus(path.getFileName().toString(), gitObjectPath , lastModifiedTime.toString());
+        FileStatus fileStatus = new FileStatus(path.getFileName().toString(), gitObjectHash, lastModifiedTime.toString());
         existingData.put(path.toString(), fileStatus);
     }
 
-    protected static void writeToFile(String fileName, String filePath, List<String> lines) {
-        Path absoluteFilePath = Path.of(filePath, fileName);
-        try {
-            Files.write(absoluteFilePath, lines, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-            System.out.println("Data written to file: " + absoluteFilePath);
-        } catch (IOException e) {
-            System.err.println("An error occurred while writing to the file.");
-            e.printStackTrace();
-        }
+    private static String addBlob(String path) throws IOException {
+        String shaOfFile = SHA.fileToSHA(path);
+        String gitObjectDirectory = shaOfFile.substring(0, 2);
+        String gitObjectName = shaOfFile.substring(2);
+
+        String objectPath = ngitPath + "\\objects\\" + gitObjectDirectory;
+        NgitApplication.makeFile(gitObjectName, objectPath);
+
+        byte[] fileContents = Files.readAllBytes(Paths.get(path));
+        byte[] compressedContents = compress(fileContents);
+
+        String fullPath = objectPath + "\\" + gitObjectName;
+        Files.write(Paths.get(fullPath), compressedContents, StandardOpenOption.CREATE);
+
+        return shaOfFile;
     }
 
-    private static String addBlob(String path) {
-        String shaOfFile = SHA.fileToSHA(path);
-        String folderSHA = shaOfFile.substring(0, 2);
-        String fileSHA = shaOfFile.substring(2);
+    private static byte[] compress(byte[] data) throws IOException {
+        Deflater deflater = new Deflater();
+        deflater.setInput(data);
+        deflater.finish();
 
-        String filePath = ngitPath + "\\objects" + "\\" + folderSHA;
-
-        NgitApplication.makeFile(fileSHA, filePath);
-
-        String fileContents = SHA.getStringFromFile(path);
-
-        String compressedContents = Zlib.compress(fileContents);
-
-        List<String> fileString = Collections.singletonList(compressedContents);
-
-        writeToFile(fileSHA, filePath, fileString);
-        return filePath + "\\" + fileSHA;
+        byte[] buffer = new byte[1024];
+        try (java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream(data.length)) {
+            while (!deflater.finished()) {
+                int count = deflater.deflate(buffer); // returns the generated code... index
+                outputStream.write(buffer, 0, count);
+            }
+            return outputStream.toByteArray();
+        }
     }
 
     static Map<String, FileStatus> readExistingData(Path filePath) {

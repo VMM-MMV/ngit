@@ -6,6 +6,8 @@ public class TEST {
     public static void main(String[] args) {
         Path ngitPath = Path.of("C:\\Users\\Miguel\\IdeaProjects\\ngit2\\.ngit");
         var existingData = AddCommand.readExistingData(ngitPath.resolve("index/changes.ser"));
-        System.out.println(existingData);
+        for (var item : existingData.entrySet()) {
+            System.out.println(item);
+        }
     }
 }

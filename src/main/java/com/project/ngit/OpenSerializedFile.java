@@ -9,7 +9,7 @@ import java.util.List;
 
 public class OpenSerializedFile {
     public static void main(String[] args) {
-        List<TreeStatus> treeStatuses =  readTree("8c5bb7e6ff4eed9a7f2df8e45a90e20184be67cc536d653facc70a708f28222e");
+        List<TreeStatus> treeStatuses =  readTree("114c4ca4613e5371edc78a1e03eb7c9d24f3e5a9ad57cc82ad6601d27b894659");
     }
 
     public static List<TreeStatus> readTree(String shaOfDirectoryContents) {
