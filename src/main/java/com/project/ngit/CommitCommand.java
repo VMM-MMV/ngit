@@ -6,18 +6,21 @@ import java.util.*;
 import java.io.*;
 import java.nio.file.*;
 
-import static com.project.ngit.AddCommand.readExistingData;
+public class CommitCommand {
+    static Path ngitPath = Path.of("C:\\Users\\Miguel\\IdeaProjects\\ngit2\\.ngit");
+    static String headTree;
+    static Map<String, FileStatus> existingData = AddCommand.readExistingData(ngitPath.resolve("index/changes.ser"));;
 
-public class DirectoryLister {
-    static Path ngitPath;
-    static Map<String, FileStatus> existingData;
-
-    public static List<File> listDirectories(String rootDirectoryPath) {
+    public List<File> listOfDirectories(String rootDirectoryPath) {
         File rootDirectory = new File(rootDirectoryPath);
         if (!rootDirectory.isDirectory()) {
             throw new IllegalArgumentException("The provided file object is not a directory");
         }
 
+        return breadthFirstDirectoryTraversal(rootDirectory);
+    }
+
+    private List<File> breadthFirstDirectoryTraversal(File rootDirectory) {
         Queue<File> queue = new LinkedList<>();
         queue.offer(rootDirectory);
 
@@ -42,52 +45,57 @@ public class DirectoryLister {
         return directories;
     }
 
-    public static void makeTrees(String repositoryPath) {
-        ngitPath = Path.of(repositoryPath, ".ngit");
-        existingData = readExistingData(ngitPath.resolve("index/changes.ser"));
-        List<File> directories = listDirectories(repositoryPath);
+    public void makeTrees() {
+        List<File> directories = listOfDirectories(ngitPath.getParent().toString());
         Collections.reverse(directories);
 
-        String headTree = null;
         for (File directory : directories) {
-            headTree =  makeOneTree(directory);
+            makeOneTree(directory);
         }
 
         System.out.println(headTree);
     }
 
-    public static String makeOneTree(File directory) {
+    private void makeOneTree(File directory) {
         File[] files = directory.listFiles();
         if (files == null) {
-            return null;
+            return;
         }
 
-        StringBuilder directoryContentsHash = new StringBuilder();
-        List<TreeStatus> treeInfo = new ArrayList<>();
+        List<TreeStatus> treeInfo = collectTreeInfo(files);
 
+        if (!treeInfo.isEmpty()) {
+            String shaOfDirectoryContents = computeDirectorySHA(treeInfo);
+            headTree = shaOfDirectoryContents; // It's value will change constantly and the last value here will be the head of all the trees
+
+            writeTree(shaOfDirectoryContents, treeInfo);
+            existingData.put(directory.getAbsolutePath(), new FileStatus(directory.getName(), shaOfDirectoryContents, "tree"));
+        }
+    }
+
+    private List<TreeStatus> collectTreeInfo(File[] files) {
+        List<TreeStatus> treeInfo = new ArrayList<>();
         for (File file : files) {
             String filePath = file.getAbsolutePath();
             if (existingData.containsKey(filePath)) {
                 FileStatus fileStatus = existingData.get(filePath);
-                System.out.println(fileStatus.name());
                 String objectType = file.isDirectory() ? "tree" : "blob";
                 treeInfo.add(new TreeStatus(fileStatus.name(), fileStatus.fileHash(), objectType));
-
-                directoryContentsHash.append(fileStatus.fileHash());
             }
         }
-
-        if (directoryContentsHash.length() != 0) {
-            String shaOfDirectoryContents = SHA.computeSHA(directoryContentsHash.toString());
-            writeTree(shaOfDirectoryContents, treeInfo);
-            existingData.put(String.valueOf(directory), new FileStatus(directory.getName(),shaOfDirectoryContents,"sss"));
-            return shaOfDirectoryContents;
-        }
-
-        return null;
+        return treeInfo;
     }
 
-    protected static String writeTree(String shaOfDirectoryContents, List<TreeStatus> treeInfo) {
+    private String computeDirectorySHA(List<TreeStatus> treeInfo) {
+        StringBuilder directoryContentsHash = new StringBuilder();
+        for (TreeStatus status : treeInfo) {
+            directoryContentsHash.append(status.hash());
+        }
+        return SHA.computeSHA(directoryContentsHash.toString());
+    }
+
+
+    protected static void writeTree(String shaOfDirectoryContents, List<TreeStatus> treeInfo) {
         String folderSHA = shaOfDirectoryContents.substring(0, 2);
         String fileSHA = shaOfDirectoryContents.substring(2);
 
@@ -105,10 +113,10 @@ public class DirectoryLister {
             throw new RuntimeException("An error occurred while writing the tree to the file: " + fullFilePath, e);
         }
 
-        return fullFilePath;
     }
 
     public static void main(String[] args) {
-        makeTrees("C:\\Users\\Miguel\\IdeaProjects\\ngit2");
+        CommitCommand commitCommand = new CommitCommand();
+        commitCommand.makeTrees();
     }
 }

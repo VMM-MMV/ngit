@@ -12,7 +12,7 @@ public class CheckoutCommand {
     private static final String NGIT_OBJECTS_PATH = "C:\\Users\\Miguel\\IdeaProjects\\ngit2\\.ngit\\objects\\";
 
     public static void main(String[] args) {
-        createFilesRecursively("a042b958038c7aea229a36a9f5226121c2e42a5bdbb7edd4cc0164ab4dbd4716", new File("C:\\Users\\Miguel\\IdeaProjects\\ngit2\\output"));
+        createFilesRecursively("9e61adc97a0a6eaae1710150a25d73f60cea8243a3aab1d87d39179f6091341b", new File("C:\\Users\\Miguel\\IdeaProjects\\ngit2\\output"));
     }
 
     public static void createFilesRecursively(String shaOfDirectoryContents, File parentDirectory) {
