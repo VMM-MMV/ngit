@@ -8,11 +8,10 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 public class CheckoutCommand {
-
-    private static final String NGIT_OBJECTS_PATH = "C:\\Users\\Miguel\\IdeaProjects\\ngit2\\.ngit\\objects\\";
-
-    public static void main(String[] args) {
-        createFilesRecursively("9e61adc97a0a6eaae1710150a25d73f60cea8243a3aab1d87d39179f6091341b", new File("C:\\Users\\Miguel\\IdeaProjects\\ngit2\\output"));
+    private static String NGIT_PATH;
+    public static void execute(String repositoryPath, String hash) {
+        NGIT_PATH = repositoryPath + "\\.ngit";
+        createFilesRecursively(hash, new File("C:\\Users\\Miguel\\IdeaProjects\\ngit2\\output"));
     }
 
     public static void createFilesRecursively(String shaOfDirectoryContents, File parentDirectory) {
@@ -54,10 +53,10 @@ public class CheckoutCommand {
         writeToFile(decompressedContents, outputFile);
     }
 
-    private static String getGitObjectPath(String shaOfBlobContents) {
+    public static String getGitObjectPath(String shaOfBlobContents) {
         String gitObjectDirectory = shaOfBlobContents.substring(0, 2);
         String gitObjectName = shaOfBlobContents.substring(2);
-        return NGIT_OBJECTS_PATH + gitObjectDirectory + "\\" + gitObjectName;
+        return NGIT_PATH + "\\objects\\" + gitObjectDirectory + "\\" + gitObjectName;
     }
 
     private static byte[] readCompressedContents(String objectPath) {

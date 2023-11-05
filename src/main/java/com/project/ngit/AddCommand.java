@@ -87,7 +87,7 @@ public class AddCommand {
         byte[] buffer = new byte[1024];
         try (java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream(data.length)) {
             while (!deflater.finished()) {
-                int count = deflater.deflate(buffer); // returns the generated code... index
+                int count = deflater.deflate(buffer);
                 outputStream.write(buffer, 0, count);
             }
             return outputStream.toByteArray();

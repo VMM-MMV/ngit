@@ -8,7 +8,9 @@ import java.nio.file.*;
 
 public class CommitCommand {
     static Path ngitPath = Path.of("C:\\Users\\Miguel\\IdeaProjects\\ngit2\\.ngit");
+    static Path objectsPath = Path.of(ngitPath + "\\objects");
     static String headTree;
+    static String repositoryPath = "C:\\Users\\Miguel\\IdeaProjects\\ngit2\\.ngit";
     static Map<String, FileStatus> existingData = AddCommand.readExistingData(ngitPath.resolve("index/changes.ser"));;
 
     public List<File> listOfDirectories(String rootDirectoryPath) {
@@ -99,7 +101,7 @@ public class CommitCommand {
         String folderSHA = shaOfDirectoryContents.substring(0, 2);
         String fileSHA = shaOfDirectoryContents.substring(2);
 
-        String filePath = ngitPath.resolve("objects").resolve(folderSHA).toString();
+        String filePath = objectsPath.resolve(folderSHA).toString();
         File directory = new File(filePath);
 
         if (!directory.exists() && !directory.mkdirs()) {
@@ -115,8 +117,73 @@ public class CommitCommand {
 
     }
 
+    private void makeCommit() {
+        String directoryPath = repositoryPath + "\\heads";
+        try {
+            if (isDirectoryEmpty(directoryPath)) {
+                createFileInDirectory(directoryPath, "master", makeCommitBlob());
+                createFileInDirectory(directoryPath, "HEAD", "master");
+            } else {
+                System.out.println("Directory is not empty.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String makeCommitBlob() {
+        String commitSHA = SHA.computeSHA(headTree);
+        String gitObjectDirectory = commitSHA.substring(0, 2);
+        String gitObjectName = commitSHA.substring(2);
+
+        String gitObjectDir = objectsPath + "\\" + gitObjectDirectory;
+        String gitObjectPath = gitObjectDir + "\\" + gitObjectName;
+
+        NgitApplication.makeFolder("", gitObjectDir);
+
+        saveCommitStatus(gitObjectDir, new CommitStatus(gitObjectPath, null, System.getProperty("user.name"), "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), gitObjectName);
+        return commitSHA;
+    }
+
+    public static void saveCommitStatus(String path, CommitStatus status, String filename) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path + "\\" + filename))) {
+            oos.writeObject(status);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static CommitStatus loadCommitStatus(String filename) {
+        CommitStatus status = null;
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
+            status = (CommitStatus) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return status;
+    }
+
+    public static boolean isDirectoryEmpty(String directoryPath) {
+        File directory = new File(directoryPath);
+        if (directory.isDirectory()) {
+            String[] files = directory.list();
+            return files == null || files.length == 0;
+        } else {
+            System.out.println("The provided path is not a directory.");
+            return false;
+        }
+    }
+
+    public static void createFileInDirectory(String directoryPath, String fileName, String content) throws IOException {
+        File file = new File(directoryPath, fileName);
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(content);
+        }
+    }
+
     public static void main(String[] args) {
         CommitCommand commitCommand = new CommitCommand();
         commitCommand.makeTrees();
+        commitCommand.makeCommit();
     }
 }

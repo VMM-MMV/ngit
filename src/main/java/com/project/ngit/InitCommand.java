@@ -7,5 +7,6 @@ public class InitCommand {
         makeFolder(".ngit", repositoryPath);
         makeFolder(".ngit/objects", repositoryPath);
         makeFolder(".ngit/index", repositoryPath);
+        makeFolder(".ngit/heads", repositoryPath);
     }
 }

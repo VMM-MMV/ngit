@@ -28,6 +28,7 @@ public class NgitApplication {
 		switch (command) {
 			case "init" ->  InitCommand.execute(GLOBAL_REPOSITORY_NAME);
 			case "add" -> AddCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
+			case "checkout" -> CheckoutCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
 			default -> System.out.println("Unknown ngit command");
 		}
 	}
