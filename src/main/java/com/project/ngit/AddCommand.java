@@ -28,6 +28,7 @@ public class AddCommand {
         } else {
             processSingleFile(argument);
         }
+
         saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
     }
 
@@ -53,7 +54,7 @@ public class AddCommand {
 
         String gitObjectHash = null;
         try {
-            gitObjectHash = addBlob(String.valueOf(path));
+            gitObjectHash = addBlob(String.valueOf(ngitPath), String.valueOf(path));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -62,7 +63,7 @@ public class AddCommand {
         existingData.put(path.toString(), fileStatus);
     }
 
-    private static String addBlob(String path) throws IOException {
+    static String addBlob(String ngitPath, String path) throws IOException {
         String shaOfFile = SHA.fileToSHA(path);
         String gitObjectDirectory = shaOfFile.substring(0, 2);
         String gitObjectName = shaOfFile.substring(2);
@@ -106,7 +107,7 @@ public class AddCommand {
         }
     }
 
-    private static void saveDataToFile(Path filePath, Map<String, FileStatus> data) {
+    static void saveDataToFile(Path filePath, Map<String, FileStatus> data) {
         try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(filePath))) {
             oos.writeObject(data);
         } catch (IOException e) {

@@ -2,16 +2,19 @@ package com.project.ngit;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.io.*;
 import java.nio.file.*;
+
+import static com.project.ngit.AddCommand.*;
 
 public class CommitCommand {
     static Path ngitPath = Path.of("C:\\Users\\Miguel\\IdeaProjects\\ngit2\\.ngit");
     static Path objectsPath = Path.of(ngitPath + "\\objects");
     static String headTree;
     static String repositoryPath = "C:\\Users\\Miguel\\IdeaProjects\\ngit2\\.ngit";
-    static Map<String, FileStatus> existingData = AddCommand.readExistingData(ngitPath.resolve("index/changes.ser"));;
+    static Map<String, FileStatus> existingData = readExistingData(ngitPath.resolve("index/changes.ser"));;
 
     public List<File> listOfDirectories(String rootDirectoryPath) {
         File rootDirectory = new File(rootDirectoryPath);
@@ -113,7 +116,6 @@ public class CommitCommand {
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while writing the tree to the file: " + fullFilePath, e);
         }
-
     }
 
     private void makeCommit() {
@@ -125,11 +127,10 @@ public class CommitCommand {
             } else {
                 String currentBranch = SHA.getStringFromFile(directoryPath + "\\HEAD");
                 String currentCommitSHA = SHA.getStringFromFile(directoryPath + "\\" + currentBranch);
+
                 var commitContents = loadCommitStatus(objectsPath + "\\" + currentCommitSHA.substring(0,2) + "\\" + currentCommitSHA.substring(2));
                 System.out.println(commitContents);
                 String shaOfNewCommit = makeCommitBlob(commitContents.currentCommit());
-                System.out.println(shaOfNewCommit);
-
                 createFileInDirectory(directoryPath, currentBranch, shaOfNewCommit);
             }
         } catch (IOException e) {
@@ -188,8 +189,41 @@ public class CommitCommand {
         }
     }
 
+    public void updateChangedFiles() {
+        // Iterate over the entries of the existing data map
+        for (Map.Entry<String, FileStatus> entry : new HashMap<>(existingData).entrySet()) {
+            String filePath = entry.getKey();
+            FileStatus storedStatus = entry.getValue();
+
+            try {
+                Path path = Paths.get(filePath);
+                // Skip if the file does not exist
+                if (!Files.exists(path)) {
+                    continue;
+                }
+
+                FileTime currentModifiedTime = Files.getLastModifiedTime(path);
+
+                // Check if the file has been modified since the last update
+                if (!storedStatus.lastModifiedDate().equals(currentModifiedTime.toString())) {
+                    // Rehash the file, save the blob, and update the existing data
+                    String gitObjectHash = addBlob(String.valueOf(ngitPath), filePath);
+                    FileStatus updatedStatus = new FileStatus(path.getFileName().toString(), gitObjectHash, currentModifiedTime.toString());
+                    existingData.put(filePath, updatedStatus);
+                }
+            } catch (IOException e) {
+                System.err.println("Error processing file: " + filePath);
+                e.printStackTrace();
+            }
+        }
+
+        saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
+    }
+
+
     public static void main(String[] args) {
         CommitCommand commitCommand = new CommitCommand();
+        commitCommand.updateChangedFiles();
         commitCommand.makeTrees();
         commitCommand.makeCommit();
     }
