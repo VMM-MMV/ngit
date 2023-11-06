@@ -1,7 +1,7 @@
 package com.project.ngit;
 
 public class InitCommand {
-    private String repositoryPath;
+    private final String repositoryPath;
 
     public InitCommand(String repositoryPath) {
         this.repositoryPath = repositoryPath;
