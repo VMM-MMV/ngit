@@ -8,44 +8,44 @@ import java.util.stream.Stream;
 import java.util.zip.Deflater;
 
 public class AddCommand {
-    static Path ngitPath;
-    static String repositoryPath;
-    static Map<String, BlobStatus> existingData = new HashMap<>();
+    private final Path ngitPath;
+    private final String repositoryPath;
+    private Map<String, BlobStatus> existingData;
 
-    public static void execute(String repositoryPath, String argument) {
-        if (argument == null) {
-            System.out.println("No argument provided for add command.");
-            return;
-        }
-
-        AddCommand.repositoryPath = repositoryPath;
-        ngitPath = Path.of(repositoryPath, ".ngit");
-
-        existingData = readExistingData(ngitPath.resolve("index/changes.ser"));
-
-        if (argument.equals(".")) {
-            processAllFilesInRepository();
-        } else {
-            processSingleFile(argument);
-        }
-
-        saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
+    public AddCommand(String repositoryPath) {
+        this.repositoryPath = repositoryPath;
+        this.ngitPath = Path.of(repositoryPath, ".ngit");
+        this.existingData = new HashMap<>();
     }
 
-    private static void processAllFilesInRepository() {
+    public static void execute(String repositoryPath, String argument) {
+        AddCommand command = new AddCommand(repositoryPath);
+
+        command.existingData = NgitApplication.readExistingData(command.ngitPath.resolve("index/changes.ser"));
+
+        if (argument.equals(".")) {
+            command.processAllFilesInRepository();
+        } else {
+            command.processSingleFile(argument);
+        }
+
+        NgitApplication.saveDataToFile(command.ngitPath.resolve("index/changes.ser"), command.existingData);
+    }
+
+    private void processAllFilesInRepository() {
         try (Stream<Path> stream = Files.walk(Path.of(repositoryPath))) {
-            stream.forEach(AddCommand::processPath);
+            stream.forEach(this::processPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void processSingleFile(String argument) {
+    private void processSingleFile(String argument) {
         Path filePath = Path.of(repositoryPath).resolve(argument);
         processPath(filePath);
     }
 
-    private static void processPath(Path path) {
+    private void processPath(Path path) {
         if (Files.isDirectory(path) || String.valueOf(path).contains(".ngit") || String.valueOf(path).contains(".git")) {
             return;
         }
@@ -88,32 +88,12 @@ public class AddCommand {
         deflater.finish();
 
         byte[] buffer = new byte[1024];
-        try (java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream(data.length)) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length)) {
             while (!deflater.finished()) {
                 int count = deflater.deflate(buffer);
                 outputStream.write(buffer, 0, count);
             }
             return outputStream.toByteArray();
-        }
-    }
-
-    static Map<String, BlobStatus> readExistingData(Path filePath) {
-        if (!Files.exists(filePath)) {
-            return new HashMap<>();
-        }
-
-        try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(filePath))) {
-            return (Map<String, BlobStatus>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("Failed to read existing data", e);
-        }
-    }
-
-    static void saveDataToFile(Path filePath, Map<String, BlobStatus> data) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(filePath))) {
-            oos.writeObject(data);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }

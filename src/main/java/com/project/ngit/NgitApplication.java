@@ -1,6 +1,8 @@
 package com.project.ngit;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,6 +11,8 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NgitApplication {
 	final static String GLOBAL_REPOSITORY_NAME = System.getProperty("user.dir");
@@ -87,5 +91,25 @@ public class NgitApplication {
 
 	public static boolean directoryExists(Path directory) {
 		return Files.exists(directory) && Files.isDirectory(directory);
+	}
+
+	static Map<String, BlobStatus> readExistingData(Path filePath) {
+		if (!Files.exists(filePath)) {
+			return new HashMap<>();
+		}
+
+		try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(filePath))) {
+			return (Map<String, BlobStatus>) ois.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			throw new RuntimeException("Failed to read existing data", e);
+		}
+	}
+
+	static void saveDataToFile(Path filePath, Map<String, BlobStatus> data) {
+		try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(filePath))) {
+			oos.writeObject(data);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

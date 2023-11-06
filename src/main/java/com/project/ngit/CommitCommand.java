@@ -1,24 +1,22 @@
 package com.project.ngit;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.io.*;
 import java.nio.file.*;
 
-import static com.project.ngit.AddCommand.*;
+import static com.project.ngit.NgitApplication.*;
 
 public class CommitCommand {
     static Path objectsPath;
-    static String repositoryPath;
+    static Path ngitPath;
     static Map<String, BlobStatus> existingData;
 
     public static void execute(String repositoryPath, String commitMessage) {
-        CommitCommand.repositoryPath = repositoryPath;
         ngitPath = Path.of(repositoryPath + "\\.ngit\\");
         objectsPath = ngitPath.resolve("objects");
-        existingData = readExistingData(ngitPath.resolve("index/changes.ser"));
+        existingData = NgitApplication.readExistingData(ngitPath.resolve("index/changes.ser"));
         CommitCommand.updateChangedFiles();
 
         TreeMaker treeMaker = new TreeMaker(objectsPath, existingData);
@@ -45,7 +43,7 @@ public class CommitCommand {
                 // Check if the file has been modified since the last update
                 if (!storedStatus.lastModifiedDate().equals(currentModifiedTime.toString())) {
                     // Rehash the file, save the blob, and update the existing data
-                    String gitObjectHash = addBlob(String.valueOf(ngitPath), filePath);
+                    String gitObjectHash = AddCommand.addBlob(String.valueOf(ngitPath), filePath);
                     BlobStatus updatedStatus = new BlobStatus(path.getFileName().toString(), gitObjectHash, currentModifiedTime.toString());
                     existingData.put(filePath, updatedStatus);
                 }
