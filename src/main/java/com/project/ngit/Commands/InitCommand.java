@@ -1,4 +1,6 @@
-package com.project.ngit;
+package com.project.ngit.Commands;
+
+import com.project.ngit.NgitApplication;
 
 public class InitCommand {
     private final String repositoryPath;

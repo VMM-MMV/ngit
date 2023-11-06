@@ -1,4 +1,7 @@
-package com.project.ngit;
+package com.project.ngit.Commands;
+
+import com.project.ngit.Commands.Commit.CommitMaker;
+import com.project.ngit.Hash.SHA;
 
 public class LogCommand {
     private final String objectsPath;

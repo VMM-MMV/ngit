@@ -1,4 +1,8 @@
-package com.project.ngit;
+package com.project.ngit.Commands.Commit;
+
+import com.project.ngit.Commands.AddCommand;
+import com.project.ngit.NgitApplication;
+import com.project.ngit.ObjectStatuses.BlobStatus;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

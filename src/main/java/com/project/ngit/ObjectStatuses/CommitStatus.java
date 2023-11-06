@@ -1,4 +1,4 @@
-package com.project.ngit;
+package com.project.ngit.ObjectStatuses;
 
 import java.io.Serializable;
 

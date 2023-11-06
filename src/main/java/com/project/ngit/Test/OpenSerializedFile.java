@@ -1,4 +1,6 @@
-package com.project.ngit;
+package com.project.ngit.Test;
+
+import com.project.ngit.ObjectStatuses.TreeStatus;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;

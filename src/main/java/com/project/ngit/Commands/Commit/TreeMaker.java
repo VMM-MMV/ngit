@@ -1,4 +1,8 @@
-package com.project.ngit;
+package com.project.ngit.Commands.Commit;
+
+import com.project.ngit.ObjectStatuses.BlobStatus;
+import com.project.ngit.Hash.SHA;
+import com.project.ngit.ObjectStatuses.TreeStatus;
 
 import java.io.*;
 import java.nio.file.*;

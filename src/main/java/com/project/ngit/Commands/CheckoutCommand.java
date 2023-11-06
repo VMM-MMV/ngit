@@ -1,4 +1,9 @@
-package com.project.ngit;
+package com.project.ngit.Commands;
+
+import com.project.ngit.Commands.Commit.CommitMaker;
+import com.project.ngit.NgitApplication;
+import com.project.ngit.Hash.SHA;
+import com.project.ngit.ObjectStatuses.TreeStatus;
 
 import java.io.*;
 import java.nio.file.Files;

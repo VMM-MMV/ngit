@@ -1,4 +1,8 @@
-package com.project.ngit;
+package com.project.ngit.Commands;
+
+import com.project.ngit.NgitApplication;
+import com.project.ngit.ObjectStatuses.BlobStatus;
+import com.project.ngit.Hash.SHA;
 
 import java.io.*;
 import java.nio.file.*;
@@ -21,6 +25,7 @@ public class AddCommand {
     public void execute(String argument) {
         existingData = NgitApplication.readExistingData(ngitPath.resolve("index/changes.ser"));
 
+        assert argument != null;
         if (argument.equals(".")) {
             processAllFilesInRepository();
         } else {
@@ -62,7 +67,7 @@ public class AddCommand {
         existingData.put(path.toString(), blobStatus);
     }
 
-    String addBlob(String ngitPath, String path) throws IOException {
+    public String addBlob(String ngitPath, String path) throws IOException {
         String shaOfFile = SHA.fileToSHA(path);
         String gitObjectDirectory = shaOfFile.substring(0, 2);
         String gitObjectName = shaOfFile.substring(2);

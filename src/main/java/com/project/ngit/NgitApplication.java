@@ -1,5 +1,9 @@
 package com.project.ngit;
 
+import com.project.ngit.Commands.*;
+import com.project.ngit.Commands.Commit.CommitCommand;
+import com.project.ngit.ObjectStatuses.BlobStatus;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -49,7 +53,7 @@ public class NgitApplication {
 		}
 	}
 
-	protected static FileTime getLastModifiedTime(Path path) {
+	public static FileTime getLastModifiedTime(Path path) {
 		try {
 			BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
 			return attrs.lastModifiedTime();
@@ -58,7 +62,7 @@ public class NgitApplication {
 		}
 	}
 
-	protected static void makeFolder(String folderName, String repositoryPath) {
+	public static void makeFolder(String folderName, String repositoryPath) {
 		Path dirPath = Paths.get(repositoryPath + "/" + folderName);
 
 		if (directoryExists(dirPath)) {
@@ -72,7 +76,7 @@ public class NgitApplication {
 		}
 	}
 
-	protected static void makeFile(String filePath, String fileName , String content) {
+	public static void makeFile(String filePath, String fileName, String content) {
 		Path parentDirPath = Path.of(filePath);
 		Path absoluteFilePath = parentDirPath.resolve(fileName);
 
@@ -93,7 +97,7 @@ public class NgitApplication {
 		return Files.exists(directory) && Files.isDirectory(directory);
 	}
 
-	static Map<String, BlobStatus> readExistingData(Path filePath) {
+	public static Map<String, BlobStatus> readExistingData(Path filePath) {
 		if (!Files.exists(filePath)) {
 			return new HashMap<>();
 		}
@@ -105,7 +109,7 @@ public class NgitApplication {
 		}
 	}
 
-	static void saveDataToFile(Path filePath, Map<String, BlobStatus> data) {
+	public static void saveDataToFile(Path filePath, Map<String, BlobStatus> data) {
 		try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(filePath))) {
 			oos.writeObject(data);
 		} catch (IOException e) {
