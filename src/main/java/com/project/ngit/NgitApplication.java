@@ -28,12 +28,15 @@ public class NgitApplication {
 					      ? String.join(" ", Arrays.copyOfRange(input, 1, input.length))
 					      : null;
 
+		String[] parts = argument.split(" to ", 2);
+
 		switch (command) {
 			case "init" ->  InitCommand.execute(GLOBAL_REPOSITORY_NAME);
 			case "add" -> AddCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
 			case "checkout" -> CheckoutCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
 			case "commit" -> CommitCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
 			case "log" -> LogCommand.execute(GLOBAL_REPOSITORY_NAME);
+			case "rebase" -> RebaseCommand.execute(GLOBAL_REPOSITORY_NAME, parts[0], parts[1]);
 			default -> System.out.println("Unknown ngit command");
 		}
 	}
