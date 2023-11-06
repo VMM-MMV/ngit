@@ -17,6 +17,8 @@ public class LogCommand {
             return;
         }
         var commitContents = loadCommitStatus(objectsPath + "\\" + commitSHA.substring(0,2) + "\\" + commitSHA.substring(2));
+        System.err.println(commitContents.currentCommit());
+        System.out.println(commitContents.previousCommit());
         System.err.println(commitContents.content());
         System.out.println(commitContents.message());
         System.out.println(commitContents.creator());

@@ -35,7 +35,7 @@ public class CommitMaker {
     }
 
     private String makeCommitBlob(String pastCommitSHA, String commitMessage) {
-        String commitSHA = SHA.computeSHA(headTree + pastCommitSHA + commitMessage + System.getProperty("user.name"));
+        String commitSHA = SHA.computeSHA(headTree);
         String gitObjectDirectory = commitSHA.substring(0, 2);
         String gitObjectName = commitSHA.substring(2);
 
