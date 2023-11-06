@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -60,24 +61,29 @@ public class NgitApplication {
 		}
 	}
 
-	protected static void makeFile(String fileName, String filePath) {
+	protected static void makeFile(String filePath, String fileName , String content) {
 		Path parentDirPath = Path.of(filePath);
 		Path absoluteFilePath = parentDirPath.resolve(fileName);
 
-		if (Files.exists(absoluteFilePath)) {
-			return;
-		}
-
 		try {
+			// Create the directories if they do not exist
 			Files.createDirectories(parentDirPath);
-			Files.createFile(absoluteFilePath);
+
+			// Create the file if it does not exist and write/append the content
+			if (!Files.exists(absoluteFilePath)) {
+				Files.createFile(absoluteFilePath);
+				Files.writeString(absoluteFilePath, content, StandardOpenOption.CREATE);
+			} else {
+				// Use StandardOpenOption.APPEND to append the content to the existing file
+				Files.writeString(absoluteFilePath, content, StandardOpenOption.APPEND);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 
-	protected static boolean directoryExists(Path directory) {
+	public static boolean directoryExists(Path directory) {
 		return Files.exists(directory) && Files.isDirectory(directory);
 	}
 }
