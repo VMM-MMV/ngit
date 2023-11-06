@@ -40,10 +40,10 @@ public class NgitApplication {
 		switch (command) {
 			case "init" ->  InitCommand.execute(GLOBAL_REPOSITORY_NAME);
 			case "add" -> new AddCommand(GLOBAL_REPOSITORY_NAME).execute(argument);
-			case "checkout" -> CheckoutCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
+			case "checkout" -> new CheckoutCommand(GLOBAL_REPOSITORY_NAME).execute(argument);
 			case "commit" -> new CommitCommand(GLOBAL_REPOSITORY_NAME).execute(argument);
 			case "log" -> LogCommand.execute(GLOBAL_REPOSITORY_NAME);
-			case "branch" -> BranchCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
+			case "branch" -> new BranchCommand(GLOBAL_REPOSITORY_NAME).execute(argument);
 			case "rebase" -> RebaseCommand.execute(GLOBAL_REPOSITORY_NAME, parts[0], parts[1]);
 			default -> System.out.println("Unknown ngit command");
 		}

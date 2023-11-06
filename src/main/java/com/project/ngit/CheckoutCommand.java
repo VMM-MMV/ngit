@@ -7,25 +7,29 @@ import java.util.List;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
-import static com.project.ngit.CommitMaker.loadCommitStatus;
-
 public class CheckoutCommand {
-    private static String NGIT_PATH;
-    public static void execute(String repositoryPath, String hash) {
-        NGIT_PATH = repositoryPath + "\\.ngit";
-        String HEADS_PATH = NGIT_PATH + "\\heads";
+    private final String ngitPath;
+    private final String reporsitoryPath;
 
-        if (fileExists(HEADS_PATH, hash)) {
-            NgitApplication.makeFile(HEADS_PATH, "HEAD", hash);
-            String shaOfCommit = SHA.getStringFromFile(HEADS_PATH + "\\" + hash);
-            var commitInfo = loadCommitStatus(NGIT_PATH + "\\objects\\" + shaOfCommit.substring(0,2) + "\\" + shaOfCommit.substring(2));
-            createFilesRecursively(commitInfo.content(), new File(repositoryPath));
+    public CheckoutCommand(String repositoryPath) {
+        this.reporsitoryPath = repositoryPath;
+        this.ngitPath = repositoryPath + "\\.ngit";
+    }
+
+    public void execute(String hash) {
+        String headsPath = ngitPath + "\\heads";
+
+        if (fileExists(headsPath, hash)) {
+            NgitApplication.makeFile(headsPath, "HEAD", hash);
+            String shaOfCommit = SHA.getStringFromFile(headsPath + "\\" + hash);
+            var commitInfo = CommitMaker.loadCommitStatus(ngitPath + "\\objects\\" + shaOfCommit.substring(0,2) + "\\" + shaOfCommit.substring(2));
+            createFilesRecursively(commitInfo.content(), new File(reporsitoryPath));
         } else {
-            createFilesRecursively(hash, new File(repositoryPath));
+            createFilesRecursively(hash, new File(ngitPath.substring(0, ngitPath.length() - 5)));
         }
     }
 
-    public static void createFilesRecursively(String shaOfDirectoryContents, File parentDirectory) {
+    public void createFilesRecursively(String shaOfDirectoryContents, File parentDirectory) {
         List<TreeStatus> treeStatuses = readTree(shaOfDirectoryContents);
         if (treeStatuses == null) {
             return;
@@ -37,12 +41,12 @@ public class CheckoutCommand {
                 createFilesRecursively(status.hash(), directory);
 
             } else if ("blob".equals(status.objectType())) {
-                createBlob(String.valueOf(parentDirectory), status.name(), status.hash());
+                createBlob(parentDirectory.getPath(), status.name(), status.hash());
             }
         }
     }
 
-    public static boolean fileExists(String repositoryPath, String fileName) {
+    public boolean fileExists(String repositoryPath, String fileName) {
         File repository = new File(repositoryPath);
 
         if (!repository.exists() || !repository.isDirectory()) {
@@ -63,7 +67,7 @@ public class CheckoutCommand {
         return false;
     }
 
-    private static List<TreeStatus> readTree(String shaOfDirectoryContents) {
+    private List<TreeStatus> readTree(String shaOfDirectoryContents) {
         String filePath = getGitObjectPath(shaOfDirectoryContents);
 
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
@@ -74,7 +78,7 @@ public class CheckoutCommand {
         }
     }
 
-    public static void createBlob(String parentDirectory, String name, String shaOfBlobContents) {
+    public void createBlob(String parentDirectory, String name, String shaOfBlobContents) {
         String objectPath = getGitObjectPath(shaOfBlobContents);
         byte[] compressedContents = readCompressedContents(objectPath);
         byte[] decompressedContents = decompressContents(compressedContents);
@@ -82,13 +86,13 @@ public class CheckoutCommand {
         writeToFile(decompressedContents, outputFile);
     }
 
-    public static String getGitObjectPath(String shaOfBlobContents) {
+    public String getGitObjectPath(String shaOfBlobContents) {
         String gitObjectDirectory = shaOfBlobContents.substring(0, 2);
         String gitObjectName = shaOfBlobContents.substring(2);
-        return NGIT_PATH + "\\objects\\" + gitObjectDirectory + "\\" + gitObjectName;
+        return ngitPath + "\\objects\\" + gitObjectDirectory + "\\" + gitObjectName;
     }
 
-    private static byte[] readCompressedContents(String objectPath) {
+    private byte[] readCompressedContents(String objectPath) {
         try {
             return Files.readAllBytes(Paths.get(objectPath));
         } catch (IOException e) {
@@ -96,7 +100,7 @@ public class CheckoutCommand {
         }
     }
 
-    private static byte[] decompressContents(byte[] compressedContents) {
+    private byte[] decompressContents(byte[] compressedContents) {
         Inflater inflater = new Inflater();
         try (ByteArrayInputStream bais = new ByteArrayInputStream(compressedContents);
              InflaterInputStream iis = new InflaterInputStream(bais, inflater);
@@ -114,7 +118,7 @@ public class CheckoutCommand {
         }
     }
 
-    private static void writeToFile(byte[] decompressedContents, File outputFile) {
+    private void writeToFile(byte[] decompressedContents, File outputFile) {
         try (OutputStream os = new FileOutputStream(outputFile)) {
             os.write(decompressedContents);
         } catch (FileNotFoundException e) {
