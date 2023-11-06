@@ -1,23 +1,28 @@
 package com.project.ngit;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
-import java.util.*;
-import java.io.*;
-import java.nio.file.*;
-
-import static com.project.ngit.NgitApplication.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.io.IOException;
 
 public class CommitCommand {
-    static Path objectsPath;
-    static Path ngitPath;
-    static Map<String, BlobStatus> existingData;
+    private final Path objectsPath;
+    private final Path ngitPath;
+    private final Map<String, BlobStatus> existingData;
+    private final String repositoryPath;
 
-    public static void execute(String repositoryPath, String commitMessage) {
-        ngitPath = Path.of(repositoryPath + "\\.ngit\\");
-        objectsPath = ngitPath.resolve("objects");
-        existingData = NgitApplication.readExistingData(ngitPath.resolve("index/changes.ser"));
-        CommitCommand.updateChangedFiles();
+    public CommitCommand(String repositoryPath) {
+        this.repositoryPath = repositoryPath;
+        this.ngitPath = Path.of(repositoryPath, ".ngit");
+        this.objectsPath = ngitPath.resolve("objects");
+        this.existingData = NgitApplication.readExistingData(ngitPath.resolve("index/changes.ser"));
+    }
+
+    public void execute(String commitMessage) {
+        this.updateChangedFiles();
 
         TreeMaker treeMaker = new TreeMaker(objectsPath, existingData);
         treeMaker.makeTrees(ngitPath);
@@ -26,7 +31,7 @@ public class CommitCommand {
         commitMaker.makeCommit(commitMessage);
     }
 
-    public static void updateChangedFiles() {
+    private void updateChangedFiles() {
         // Iterate over the entries of the existing data map
         for (Map.Entry<String, BlobStatus> entry : new HashMap<>(existingData).entrySet()) {
             String filePath = entry.getKey();
@@ -35,6 +40,7 @@ public class CommitCommand {
             try {
                 Path path = Paths.get(filePath);
                 if (!Files.exists(path)) {
+                    existingData.remove(filePath); // If file doesn't exist, remove it from the map
                     continue;
                 }
 
@@ -43,7 +49,7 @@ public class CommitCommand {
                 // Check if the file has been modified since the last update
                 if (!storedStatus.lastModifiedDate().equals(currentModifiedTime.toString())) {
                     // Rehash the file, save the blob, and update the existing data
-                    String gitObjectHash = AddCommand.addBlob(String.valueOf(ngitPath), filePath);
+                    String gitObjectHash = new AddCommand(repositoryPath).addBlob(ngitPath.toString(), filePath);
                     BlobStatus updatedStatus = new BlobStatus(path.getFileName().toString(), gitObjectHash, currentModifiedTime.toString());
                     existingData.put(filePath, updatedStatus);
                 }
@@ -53,6 +59,6 @@ public class CommitCommand {
             }
         }
 
-        saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
+        NgitApplication.saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
     }
 }
