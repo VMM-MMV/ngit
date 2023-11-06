@@ -1,12 +1,16 @@
 package com.project.ngit;
 
-import static com.project.ngit.NgitApplication.makeFolder;
-
 public class InitCommand {
-    public static void execute(String repositoryPath) {
-        makeFolder(".ngit", repositoryPath);
-        makeFolder(".ngit/objects", repositoryPath);
-        makeFolder(".ngit/index", repositoryPath);
-        makeFolder(".ngit/heads", repositoryPath);
+    private String repositoryPath;
+
+    public InitCommand(String repositoryPath) {
+        this.repositoryPath = repositoryPath;
+    }
+
+    public void execute() {
+        NgitApplication.makeFolder(".ngit", repositoryPath);
+        NgitApplication.makeFolder(".ngit/objects", repositoryPath);
+        NgitApplication.makeFolder(".ngit/index", repositoryPath);
+        NgitApplication.makeFolder(".ngit/heads", repositoryPath);
     }
 }
