@@ -1,12 +1,12 @@
 package com.project.ngit;
 
-import static com.project.ngit.CommitCommand.loadCommitStatus;
+import static com.project.ngit.CommitMaker.loadCommitStatus;
 
 public class LogCommand {
     static String objectsPath;
     public static void execute(String repositoryPath) {
         objectsPath = repositoryPath + "\\.ngit\\objects";
-        String directoryPath = repositoryPath + "//.ngit\\heads";
+        String directoryPath = repositoryPath + "\\.ngit\\heads";
         String currentBranch = SHA.getStringFromFile(directoryPath + "\\HEAD");
         String currentCommitSHA = SHA.getStringFromFile(directoryPath + "\\" + currentBranch);
         recursiveLog(currentCommitSHA);

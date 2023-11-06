@@ -10,7 +10,7 @@ import java.util.zip.Deflater;
 public class AddCommand {
     static Path ngitPath;
     static String repositoryPath;
-    static Map<String, FileStatus> existingData = new HashMap<>();
+    static Map<String, BlobStatus> existingData = new HashMap<>();
 
     public static void execute(String repositoryPath, String argument) {
         if (argument == null) {
@@ -53,14 +53,15 @@ public class AddCommand {
         FileTime lastModifiedTime = NgitApplication.getLastModifiedTime(path);
 
         String gitObjectHash;
+
         try {
             gitObjectHash = addBlob(String.valueOf(ngitPath), String.valueOf(path));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        FileStatus fileStatus = new FileStatus(path.getFileName().toString(), gitObjectHash, lastModifiedTime.toString());
-        existingData.put(path.toString(), fileStatus);
+        BlobStatus blobStatus = new BlobStatus(path.getFileName().toString(), gitObjectHash, lastModifiedTime.toString());
+        existingData.put(path.toString(), blobStatus);
     }
 
     static String addBlob(String ngitPath, String path) throws IOException {
@@ -96,19 +97,19 @@ public class AddCommand {
         }
     }
 
-    static Map<String, FileStatus> readExistingData(Path filePath) {
+    static Map<String, BlobStatus> readExistingData(Path filePath) {
         if (!Files.exists(filePath)) {
             return new HashMap<>();
         }
 
         try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(filePath))) {
-            return (Map<String, FileStatus>) ois.readObject();
+            return (Map<String, BlobStatus>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Failed to read existing data", e);
         }
     }
 
-    static void saveDataToFile(Path filePath, Map<String, FileStatus> data) {
+    static void saveDataToFile(Path filePath, Map<String, BlobStatus> data) {
         try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(filePath))) {
             oos.writeObject(data);
         } catch (IOException e) {

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
-import static com.project.ngit.CommitCommand.loadCommitStatus;
+import static com.project.ngit.CommitMaker.loadCommitStatus;
 
 public class CheckoutCommand {
     private static String NGIT_PATH;
@@ -34,9 +34,6 @@ public class CheckoutCommand {
         for (TreeStatus status : treeStatuses) {
             if ("tree".equals(status.objectType())) {
                 File directory = new File(parentDirectory, status.name());
-                if (!directory.exists() && !directory.mkdirs()) {
-                    System.err.println("Failed to create directory: " + directory.getAbsolutePath());
-                }
                 createFilesRecursively(status.hash(), directory);
 
             } else if ("blob".equals(status.objectType())) {
