@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import static com.project.ngit.CommitCommand.loadCommitStatus;
+
 public class CheckoutCommand {
     private static String NGIT_PATH;
     public static void execute(String repositoryPath, String hash) {
@@ -15,13 +17,12 @@ public class CheckoutCommand {
 
         if (fileExists(HEADS_PATH, hash)) {
             NgitApplication.makeFile(HEADS_PATH, "HEAD", hash);
+            String shaOfCommit = SHA.getStringFromFile(HEADS_PATH + "\\" + hash);
+            var commitInfo = loadCommitStatus(NGIT_PATH + "\\objects\\" + shaOfCommit.substring(0,2) + "\\" + shaOfCommit.substring(2));
+            createFilesRecursively(commitInfo.content(), new File(repositoryPath));
         } else {
             createFilesRecursively(hash, new File(repositoryPath));
         }
-    }
-
-    private void changeHead(String branchName) {
-
     }
 
     public static void createFilesRecursively(String shaOfDirectoryContents, File parentDirectory) {

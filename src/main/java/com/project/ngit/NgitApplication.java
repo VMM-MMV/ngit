@@ -28,7 +28,10 @@ public class NgitApplication {
 					      ? String.join(" ", Arrays.copyOfRange(input, 1, input.length))
 					      : null;
 
-		String[] parts = argument.split(" to ", 2);
+		String[] parts = new String[0];
+		if (argument != null && argument.contains(" to ")) {
+			parts = argument.split(" to ", 2);
+		}
 
 		switch (command) {
 			case "init" ->  InitCommand.execute(GLOBAL_REPOSITORY_NAME);
@@ -36,6 +39,7 @@ public class NgitApplication {
 			case "checkout" -> CheckoutCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
 			case "commit" -> CommitCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
 			case "log" -> LogCommand.execute(GLOBAL_REPOSITORY_NAME);
+			case "branch" -> BranchCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
 			case "rebase" -> RebaseCommand.execute(GLOBAL_REPOSITORY_NAME, parts[0], parts[1]);
 			default -> System.out.println("Unknown ngit command");
 		}
