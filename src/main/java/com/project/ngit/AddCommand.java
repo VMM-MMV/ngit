@@ -8,8 +8,8 @@ import java.util.stream.Stream;
 import java.util.zip.Deflater;
 
 public class AddCommand {
-    private final Path ngitPath;
-    private final String repositoryPath;
+    private Path ngitPath;
+    private String repositoryPath;
     private Map<String, BlobStatus> existingData;
 
     public AddCommand(String repositoryPath) {
@@ -18,18 +18,16 @@ public class AddCommand {
         this.existingData = new HashMap<>();
     }
 
-    public static void execute(String repositoryPath, String argument) {
-        AddCommand command = new AddCommand(repositoryPath);
-
-        command.existingData = NgitApplication.readExistingData(command.ngitPath.resolve("index/changes.ser"));
+    public void execute(String argument) {
+        existingData = NgitApplication.readExistingData(ngitPath.resolve("index/changes.ser"));
 
         if (argument.equals(".")) {
-            command.processAllFilesInRepository();
+            processAllFilesInRepository();
         } else {
-            command.processSingleFile(argument);
+            processSingleFile(argument);
         }
 
-        NgitApplication.saveDataToFile(command.ngitPath.resolve("index/changes.ser"), command.existingData);
+        NgitApplication.saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
     }
 
     private void processAllFilesInRepository() {
@@ -64,7 +62,7 @@ public class AddCommand {
         existingData.put(path.toString(), blobStatus);
     }
 
-    static String addBlob(String ngitPath, String path) throws IOException {
+    String addBlob(String ngitPath, String path) throws IOException {
         String shaOfFile = SHA.fileToSHA(path);
         String gitObjectDirectory = shaOfFile.substring(0, 2);
         String gitObjectName = shaOfFile.substring(2);
@@ -82,7 +80,7 @@ public class AddCommand {
         return shaOfFile;
     }
 
-    private static byte[] compress(byte[] data) throws IOException {
+    private byte[] compress(byte[] data) throws IOException {
         Deflater deflater = new Deflater();
         deflater.setInput(data);
         deflater.finish();

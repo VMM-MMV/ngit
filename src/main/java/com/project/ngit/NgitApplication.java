@@ -39,7 +39,7 @@ public class NgitApplication {
 
 		switch (command) {
 			case "init" ->  InitCommand.execute(GLOBAL_REPOSITORY_NAME);
-			case "add" -> AddCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
+			case "add" -> new AddCommand(GLOBAL_REPOSITORY_NAME).execute(argument);
 			case "checkout" -> CheckoutCommand.execute(GLOBAL_REPOSITORY_NAME, argument);
 			case "commit" -> new CommitCommand(GLOBAL_REPOSITORY_NAME).execute(argument);
 			case "log" -> LogCommand.execute(GLOBAL_REPOSITORY_NAME);
