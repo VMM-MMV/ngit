@@ -1,24 +1,25 @@
 package com.project.ngit;
 
-import static com.project.ngit.CommitMaker.loadCommitStatus;
-
 public class LogCommand {
-    static String objectsPath;
-    public static void execute(String repositoryPath) {
-        objectsPath = repositoryPath + "\\.ngit\\objects";
-        String directoryPath = repositoryPath + "\\.ngit\\heads";
+    private final String objectsPath;
+    private final String directoryPath;
+
+    public LogCommand(String repositoryPath) {
+        this.objectsPath = repositoryPath + "\\.ngit\\objects";
+        this.directoryPath = repositoryPath + "\\.ngit\\heads";
+    }
+
+    public void execute() {
         String currentBranch = SHA.getStringFromFile(directoryPath + "\\HEAD");
         String currentCommitSHA = SHA.getStringFromFile(directoryPath + "\\" + currentBranch);
         recursiveLog(currentCommitSHA);
     }
 
-    private static void recursiveLog(String commitSHA) {
+    private void recursiveLog(String commitSHA) {
         if (commitSHA == null || commitSHA.isEmpty()) {
             return;
         }
-        var commitContents = loadCommitStatus(objectsPath + "\\" + commitSHA.substring(0,2) + "\\" + commitSHA.substring(2));
-        System.err.println(commitContents.currentCommit());
-        System.out.println(commitContents.previousCommit());
+        var commitContents = CommitMaker.loadCommitStatus(objectsPath + "\\" + commitSHA.substring(0,2) + "\\" + commitSHA.substring(2));
         System.err.println(commitContents.content());
         System.out.println(commitContents.message());
         System.out.println(commitContents.creator());
