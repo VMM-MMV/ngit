@@ -32,7 +32,6 @@ public class CommitCommand {
     }
 
     private void updateChangedFiles() {
-        // Iterate over the entries of the existing data map
         for (Map.Entry<String, BlobStatus> entry : new HashMap<>(existingData).entrySet()) {
             String filePath = entry.getKey();
             BlobStatus storedStatus = entry.getValue();
@@ -40,15 +39,13 @@ public class CommitCommand {
             try {
                 Path path = Paths.get(filePath);
                 if (!Files.exists(path)) {
-                    existingData.remove(filePath); // If file doesn't exist, remove it from the map
+                    existingData.remove(filePath);
                     continue;
                 }
 
                 FileTime currentModifiedTime = Files.getLastModifiedTime(path);
 
-                // Check if the file has been modified since the last update
                 if (!storedStatus.lastModifiedDate().equals(currentModifiedTime.toString())) {
-                    // Rehash the file, save the blob, and update the existing data
                     String gitObjectHash = new AddCommand(repositoryPath).addBlob(ngitPath.toString(), filePath);
                     BlobStatus updatedStatus = new BlobStatus(path.getFileName().toString(), gitObjectHash, currentModifiedTime.toString());
                     existingData.put(filePath, updatedStatus);

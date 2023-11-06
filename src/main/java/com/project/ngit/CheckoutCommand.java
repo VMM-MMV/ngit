@@ -23,13 +23,13 @@ public class CheckoutCommand {
             NgitApplication.makeFile(headsPath, "HEAD", hash);
             String shaOfCommit = SHA.getStringFromFile(headsPath + "\\" + hash);
             var commitInfo = CommitMaker.loadCommitStatus(ngitPath + "\\objects\\" + shaOfCommit.substring(0,2) + "\\" + shaOfCommit.substring(2));
-            createFilesRecursively(commitInfo.content(), new File(reporsitoryPath));
+            createFoldersRecursively(commitInfo.content(), new File(reporsitoryPath));
         } else {
-            createFilesRecursively(hash, new File(ngitPath.substring(0, ngitPath.length() - 5)));
+            createFoldersRecursively(hash, new File(ngitPath.substring(0, ngitPath.length() - 5)));
         }
     }
 
-    public void createFilesRecursively(String shaOfDirectoryContents, File parentDirectory) {
+    public void createFoldersRecursively(String shaOfDirectoryContents, File parentDirectory) {
         List<TreeStatus> treeStatuses = readTree(shaOfDirectoryContents);
         if (treeStatuses == null) {
             return;
@@ -38,10 +38,10 @@ public class CheckoutCommand {
         for (TreeStatus status : treeStatuses) {
             if ("tree".equals(status.objectType())) {
                 File directory = new File(parentDirectory, status.name());
-                createFilesRecursively(status.hash(), directory);
+                createFoldersRecursively(status.hash(), directory);
 
             } else if ("blob".equals(status.objectType())) {
-                createBlob(parentDirectory.getPath(), status.name(), status.hash());
+                createFileFromBlob(parentDirectory.getPath(), status.name(), status.hash());
             }
         }
     }
@@ -78,7 +78,7 @@ public class CheckoutCommand {
         }
     }
 
-    public void createBlob(String parentDirectory, String name, String shaOfBlobContents) {
+    public void createFileFromBlob(String parentDirectory, String name, String shaOfBlobContents) {
         String objectPath = getGitObjectPath(shaOfBlobContents);
         byte[] compressedContents = readCompressedContents(objectPath);
         byte[] decompressedContents = decompressContents(compressedContents);

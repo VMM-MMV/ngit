@@ -1,7 +1,5 @@
 package com.project.ngit;
 
-import com.project.ngit.TreeStatus;
-
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;

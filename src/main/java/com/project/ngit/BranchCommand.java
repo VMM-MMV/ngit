@@ -3,7 +3,7 @@ package com.project.ngit;
 import java.nio.file.Path;
 
 public class BranchCommand {
-    private String repositoryPath;
+    private final String repositoryPath;
 
     public BranchCommand(String repositoryPath) {
         this.repositoryPath = repositoryPath;
@@ -12,9 +12,7 @@ public class BranchCommand {
     public void execute(String nameOfBranch) {
         String ngitPath = repositoryPath + "\\.ngit";
 
-        if (!NgitApplication.directoryExists(Path.of(ngitPath + "\\heads"))) {
-            return;
-        }
+        if (!NgitApplication.directoryExists(Path.of(ngitPath + "\\heads"))) return;
 
         NgitApplication.makeFile(ngitPath + "\\heads", nameOfBranch, "");
     }

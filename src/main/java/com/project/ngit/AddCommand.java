@@ -8,8 +8,8 @@ import java.util.stream.Stream;
 import java.util.zip.Deflater;
 
 public class AddCommand {
-    private Path ngitPath;
-    private String repositoryPath;
+    private final Path ngitPath;
+    private final String repositoryPath;
     private Map<String, BlobStatus> existingData;
 
     public AddCommand(String repositoryPath) {
