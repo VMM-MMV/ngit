@@ -69,18 +69,13 @@ public class NgitApplication {
 			// Create the directories if they do not exist
 			Files.createDirectories(parentDirPath);
 
-			// Create the file if it does not exist and write/append the content
-			if (!Files.exists(absoluteFilePath)) {
-				Files.createFile(absoluteFilePath);
-				Files.writeString(absoluteFilePath, content, StandardOpenOption.CREATE);
-			} else {
-				// Use StandardOpenOption.APPEND to append the content to the existing file
-				Files.writeString(absoluteFilePath, content, StandardOpenOption.APPEND);
-			}
+			// Write the content to the file, overwriting existing content
+			Files.writeString(absoluteFilePath, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
 
 
 	public static boolean directoryExists(Path directory) {

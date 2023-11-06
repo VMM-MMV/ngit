@@ -11,7 +11,17 @@ public class CheckoutCommand {
     private static String NGIT_PATH;
     public static void execute(String repositoryPath, String hash) {
         NGIT_PATH = repositoryPath + "\\.ngit";
-        createFilesRecursively(hash, new File(repositoryPath));
+        String HEADS_PATH = NGIT_PATH + "\\heads";
+
+        if (fileExists(HEADS_PATH, hash)) {
+            NgitApplication.makeFile(HEADS_PATH, "HEAD", hash);
+        } else {
+            createFilesRecursively(hash, new File(repositoryPath));
+        }
+    }
+
+    private void changeHead(String branchName) {
+
     }
 
     public static void createFilesRecursively(String shaOfDirectoryContents, File parentDirectory) {
@@ -32,6 +42,27 @@ public class CheckoutCommand {
                 createBlob(String.valueOf(parentDirectory), status.name(), status.hash());
             }
         }
+    }
+
+    public static boolean fileExists(String repositoryPath, String fileName) {
+        File repository = new File(repositoryPath);
+
+        if (!repository.exists() || !repository.isDirectory()) {
+            return false;
+        }
+
+        File[] listOfFiles = repository.listFiles();
+        if (listOfFiles == null) {
+            return false;
+        }
+
+        for (File file : listOfFiles) {
+            if (file.isFile() && file.getName().equals(fileName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static List<TreeStatus> readTree(String shaOfDirectoryContents) {

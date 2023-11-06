@@ -1,7 +1,5 @@
 package com.project.ngit;
 
-import com.project.ngit.NgitApplication;
-
 import java.nio.file.Path;
 
 public class BranchCommand {
