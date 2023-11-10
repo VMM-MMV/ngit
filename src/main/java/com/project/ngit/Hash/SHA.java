@@ -45,9 +45,4 @@ public class SHA {
         }
     }
 
-//    public static void main(String[] args) {
-//        String input = "Hello, World!";
-//        String hash = computeSHA(input);
-//        System.out.println("SHA-256 Hash: " + hash);
-//    }
 }

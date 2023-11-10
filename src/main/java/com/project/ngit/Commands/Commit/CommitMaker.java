@@ -3,11 +3,15 @@ package com.project.ngit.Commands.Commit;
 import com.project.ngit.NgitApplication;
 import com.project.ngit.ObjectStatuses.CommitStatus;
 import com.project.ngit.Hash.SHA;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.Path;
+import java.nio.file.*;
 
 public class CommitMaker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommitMaker.class);
+
     private final Path objectsPath;
     private final String headTree;
     private final Path ngitPath;
@@ -19,72 +23,73 @@ public class CommitMaker {
     }
 
     public void makeCommit(String commitMessage) {
-        String directoryPath = ngitPath + "\\heads";
+        Path directoryPath = ngitPath.resolve("heads");
         try {
-            if (isDirectoryEmpty(directoryPath)) {
-                createFileInDirectory(directoryPath, "master", makeCommitBlob(null, commitMessage));
-                createFileInDirectory(directoryPath, "HEAD", "master");
+            if (Files.isDirectory(directoryPath) && isDirectoryEmpty(directoryPath)) {
+                createInitialBranchWithCommit(directoryPath, commitMessage);
             } else {
-                String currentBranch = SHA.getStringFromFile(directoryPath + "\\HEAD");
-                String currentCommitSHA = SHA.getStringFromFile(directoryPath + "\\" + currentBranch);
-
-                var commitContents = loadCommitStatus(objectsPath + "\\" + currentCommitSHA.substring(0,2) + "\\" + currentCommitSHA.substring(2));
-                System.out.println(commitContents);
-                String shaOfNewCommit = makeCommitBlob(commitContents.currentCommit(), commitMessage);
-                createFileInDirectory(directoryPath, currentBranch, shaOfNewCommit);
+                makeNewCommitOnExistingBranch(directoryPath, commitMessage);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("An I/O error occurred while making a commit", e);
         }
     }
+    private void createInitialBranchWithCommit(Path directoryPath, String commitMessage) throws IOException {
+        createFileInDirectory(directoryPath, "master", makeCommitBlob(null, commitMessage));
+        createFileInDirectory(directoryPath, "HEAD", "master");
+    }
 
-    private String makeCommitBlob(String pastCommitSHA, String commitMessage) {
+    private void makeNewCommitOnExistingBranch(Path directoryPath, String commitMessage) throws IOException {
+        Path headPath = directoryPath.resolve("HEAD");
+        String currentBranch = new String(Files.readAllBytes(headPath));
+        Path currentBranchPath = directoryPath.resolve(currentBranch);
+        String currentCommitSHA = new String(Files.readAllBytes(currentBranchPath));
+
+        Path commitPath = objectsPath.resolve(currentCommitSHA.substring(0, 2)).resolve(currentCommitSHA.substring(2));
+        CommitStatus commitContents = loadCommitStatus(commitPath);
+        String shaOfNewCommit = makeCommitBlob(commitContents.currentCommit(), commitMessage);
+        createFileInDirectory(directoryPath, currentBranch, shaOfNewCommit);
+    }
+
+    private String makeCommitBlob(String pastCommitSHA, String commitMessage) throws IOException {
         String commitSHA = SHA.computeSHA(headTree);
-        String gitObjectDirectory = commitSHA.substring(0, 2);
+        Path gitObjectDir = objectsPath.resolve(commitSHA.substring(0, 2));
         String gitObjectName = commitSHA.substring(2);
 
-        String gitObjectDir = objectsPath + "\\" + gitObjectDirectory;
-
-        NgitApplication.makeFolder("", gitObjectDir);
+        NgitApplication.makeFolder("", gitObjectDir.toString());
 
         if (!commitSHA.equals(pastCommitSHA)) {
-            saveCommitStatus(gitObjectDir, new CommitStatus(commitSHA, pastCommitSHA, System.getProperty("user.name"), headTree, commitMessage), gitObjectName);
+            Path filePath = gitObjectDir.resolve(gitObjectName);
+            saveCommitStatus(filePath, new CommitStatus(commitSHA, pastCommitSHA, System.getProperty("user.name"), headTree, commitMessage));
         }
         return commitSHA;
     }
 
-    public static void saveCommitStatus(String path, CommitStatus status, String filename) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path + "\\" + filename))) {
+    public static void saveCommitStatus(Path path, CommitStatus status) throws IOException {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path.toFile()))) {
             oos.writeObject(status);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public static CommitStatus loadCommitStatus(String filename) {
+    public static CommitStatus loadCommitStatus(Path path) {
         CommitStatus status = null;
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path.toFile()))) {
             status = (CommitStatus) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error("An error occurred while loading commit status", e);
         }
         return status;
     }
 
-    public static boolean isDirectoryEmpty(String directoryPath) {
-        File directory = new File(directoryPath);
-        if (directory.isDirectory()) {
-            String[] files = directory.list();
-            return files == null || files.length == 0;
-        } else {
-            System.out.println("The provided path is not a directory.");
-            return false;
+    public static boolean isDirectoryEmpty(Path directory) throws IOException {
+        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory)) {
+            return !dirStream.iterator().hasNext();
         }
     }
 
-    public static void createFileInDirectory(String directoryPath, String fileName, String content) throws IOException {
-        File file = new File(directoryPath, fileName);
-        try (FileWriter writer = new FileWriter(file)) {
+    public static void createFileInDirectory(Path directoryPath, String fileName, String content) throws IOException {
+        Path filePath = directoryPath.resolve(fileName);
+        try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
             writer.write(content);
         }
     }
