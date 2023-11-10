@@ -1,35 +1,56 @@
 package com.project.ngit.Commands;
 
 import com.project.ngit.Commands.Commit.CommitMaker;
+import com.project.ngit.ObjectStatuses.CommitStatus;
 import com.project.ngit.Hash.SHA;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.nio.file.*;
 
 public class LogCommand {
-    private final String objectsPath;
-    private final String directoryPath;
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogCommand.class);
+
+    private final Path objectsPath;
+    private final Path directoryPath;
 
     public LogCommand(String repositoryPath) {
-        this.objectsPath = repositoryPath + "\\.ngit\\objects";
-        this.directoryPath = repositoryPath + "\\.ngit\\heads";
+        this.objectsPath = Paths.get(repositoryPath, ".ngit", "objects");
+        this.directoryPath = Paths.get(repositoryPath, ".ngit", "heads");
     }
 
     public void execute() {
-        String currentBranch = SHA.getStringFromFile(directoryPath + "\\HEAD");
-        String currentCommitSHA = SHA.getStringFromFile(directoryPath + "\\" + currentBranch);
-        recursiveLog(currentCommitSHA);
+        try {
+            Path headPath = directoryPath.resolve("HEAD");
+            String currentBranch = SHA.getStringFromFile(headPath.toString());
+            Path currentBranchPath = directoryPath.resolve(currentBranch);
+            String currentCommitSHA = SHA.getStringFromFile(currentBranchPath.toString());
+            recursiveLog(currentCommitSHA);
+        } catch (Exception e) {
+            LOGGER.error("Error executing log command", e);
+        }
     }
 
     private void recursiveLog(String commitSHA) {
         if (commitSHA == null || commitSHA.isEmpty()) {
             return;
         }
-        var commitContents = CommitMaker.loadCommitStatus(objectsPath + "\\" + commitSHA.substring(0,2) + "\\" + commitSHA.substring(2));
-        System.err.println(commitContents.content());
-        System.out.println(commitContents.message());
-        System.out.println(commitContents.creator());
-        System.out.println();
 
-        if (commitContents.previousCommit() != null) {
-            recursiveLog(commitContents.previousCommit());
+        try {
+            Path commitPath = objectsPath.resolve(commitSHA.substring(0, 2)).resolve(commitSHA.substring(2));
+            CommitStatus commitContents = CommitMaker.loadCommitStatus(Path.of(commitPath.toFile().getAbsolutePath()));
+
+            System.out.println(commitContents.content());
+            System.out.println(commitContents.message());
+            System.out.println(commitContents.creator());
+            System.out.println();
+
+            if (commitContents.previousCommit() != null) {
+                recursiveLog(commitContents.previousCommit());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error during recursive log", e);
         }
     }
 }
