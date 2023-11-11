@@ -1,2 +1,2 @@
 @echo off
-java -cp "C:\Users\Miguel\IdeaProjects\ngit2\target\classes" com.project.ngit.NgitApplication %*
+java -jar "%~dp0target\ngit-0.0.1-SNAPSHOT-jar-with-dependencies.jar" %*
