@@ -3,23 +3,23 @@ package com.project.ngit;
 import com.project.ngit.Commands.*;
 import com.project.ngit.Commands.Commit.CommitCommand;
 import com.project.ngit.ObjectStatuses.BlobStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 
 public class NgitApplication {
 	final static String GLOBAL_REPOSITORY_NAME = System.getProperty("user.dir");
+	private static final Logger LOGGER = LoggerFactory.getLogger(NgitApplication.class);
 
 	public static void main(String[] args) {
 		NgitApplication gitClone = new NgitApplication();
@@ -27,14 +27,17 @@ public class NgitApplication {
 	}
 
 	private void processCommand(String[] input) {
-		System.out.println(Arrays.toString(input));
+		LOGGER.info("Processing command: {}", Arrays.toString(input));
 
-		if (input.length < 1) {return; }
+		if (input.length < 1) {
+			System.out.println("No command provided");
+			return;
+		}
 
 		String command = input[0];
 		String argument = (input.length > 1)
-					      ? String.join(" ", Arrays.copyOfRange(input, 1, input.length))
-					      : null;
+				? String.join(" ", Arrays.copyOfRange(input, 1, input.length))
+				: null;
 
 		String[] parts = new String[0];
 		if (argument != null && argument.contains(" to ")) {
@@ -42,14 +45,14 @@ public class NgitApplication {
 		}
 
 		switch (command) {
-			case "init" ->  new InitCommand(GLOBAL_REPOSITORY_NAME).execute();
+			case "init" -> new InitCommand(GLOBAL_REPOSITORY_NAME).execute();
 			case "add" -> new AddCommand(GLOBAL_REPOSITORY_NAME).execute(argument);
 			case "checkout" -> new CheckoutCommand(GLOBAL_REPOSITORY_NAME).execute(argument);
 			case "commit" -> new CommitCommand(GLOBAL_REPOSITORY_NAME).execute(argument);
 			case "log" -> new LogCommand(GLOBAL_REPOSITORY_NAME).execute();
 			case "branch" -> new BranchCommand(GLOBAL_REPOSITORY_NAME).execute(argument);
 			case "rebase" -> new RebaseCommand(GLOBAL_REPOSITORY_NAME).execute(parts[0], parts[1]);
-			default -> System.out.println("Unknown ngit command");
+			default -> System.out.println("Unknown ngit command: " + command);
 		}
 	}
 
@@ -63,7 +66,7 @@ public class NgitApplication {
 	}
 
 	public static void makeFolder(String folderName, String repositoryPath) {
-		Path dirPath = Paths.get(repositoryPath + "/" + folderName);
+		Path dirPath = Paths.get(repositoryPath, folderName);
 
 		if (directoryExists(dirPath)) {
 			return;
@@ -72,12 +75,12 @@ public class NgitApplication {
 		try {
 			Files.createDirectory(dirPath);
 		} catch (IOException e) {
-			System.err.println("Failed to create directory: " + e.getMessage());
+			LOGGER.error("Failed to create directory: {}", dirPath, e);
 		}
 	}
 
 	public static void makeFile(String filePath, String fileName, String content) {
-		Path parentDirPath = Path.of(filePath);
+		Path parentDirPath = Paths.get(filePath);
 		Path absoluteFilePath = parentDirPath.resolve(fileName);
 
 		try {
@@ -87,11 +90,9 @@ public class NgitApplication {
 			// Write the content to the file, overwriting existing content
 			Files.writeString(absoluteFilePath, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("Failed to write to file: {}", absoluteFilePath, e);
 		}
 	}
-
-
 
 	public static boolean directoryExists(Path directory) {
 		return Files.exists(directory) && Files.isDirectory(directory);
