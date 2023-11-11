@@ -1,27 +1,27 @@
 package com.project.ngit.Commands;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 
 public class RebaseCommand {
-    private final String headPath;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RebaseCommand.class);
+    private final Path headPath;
 
     public RebaseCommand(String repositoryPath) {
-        this.headPath = repositoryPath + "\\.ngit\\heads\\";
+        this.headPath = Paths.get(repositoryPath, ".ngit", "heads");
     }
 
-    public void execute(String fromDirectory, String toDirectory) {
-        Path sourcePath = Paths.get(headPath + fromDirectory);
-        Path destinationPath = Paths.get(headPath + toDirectory);
+    public void execute(String fromBranch, String toBranch) {
+        Path sourcePath = headPath.resolve(fromBranch);
+        Path destinationPath = headPath.resolve(toBranch);
         try {
             Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("File copied successfully!");
+            LOGGER.info("Rebase successful");
         } catch (IOException e) {
-            System.err.println("Failed to copy file: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Failed to copy file: {}", e.getMessage(), e);
         }
     }
 }
