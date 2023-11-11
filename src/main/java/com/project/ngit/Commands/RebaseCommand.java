@@ -39,7 +39,7 @@ public class RebaseCommand {
             LOGGER.info("Rebase successful");
         } catch (IOException e) {
             // Log the exception if the rebase fails
-            LOGGER.error("Failed to copy file: {}", e.getMessage(), e);
+            LOGGER.error("Failed to rebase branch: {}", e.getMessage(), e);
         }
     }
 }
