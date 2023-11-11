@@ -3,16 +3,17 @@ package com.project.ngit.Commands.Commit;
 import com.project.ngit.Commands.AddCommand;
 import com.project.ngit.NgitApplication;
 import com.project.ngit.ObjectStatuses.BlobStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.IOException;
 
 public class CommitCommand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommitCommand.class);
     private final Path objectsPath;
     private final Path ngitPath;
     private final Map<String, BlobStatus> existingData;
@@ -20,7 +21,7 @@ public class CommitCommand {
 
     public CommitCommand(String repositoryPath) {
         this.repositoryPath = repositoryPath;
-        this.ngitPath = Path.of(repositoryPath, ".ngit");
+        this.ngitPath = Paths.get(repositoryPath, ".ngit");
         this.objectsPath = ngitPath.resolve("objects");
         this.existingData = NgitApplication.readExistingData(ngitPath.resolve("index/changes.ser"));
     }
@@ -55,11 +56,11 @@ public class CommitCommand {
                     existingData.put(filePath, updatedStatus);
                 }
             } catch (IOException e) {
-                System.err.println("Error processing file: " + filePath);
-                e.printStackTrace();
+                LOGGER.error("Error processing file: {}", filePath, e);
             }
         }
 
         NgitApplication.saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
     }
+
 }
