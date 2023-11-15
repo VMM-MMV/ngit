@@ -59,7 +59,7 @@ public class CommitMaker {
      */
     private void createInitialBranchWithCommit(Path directoryPath, String commitMessage) throws IOException {
         createFileInDirectory(directoryPath, "master", makeCommitGitObject(null, commitMessage));
-        createFileInDirectory(directoryPath.resolve(".."), "HEAD", "master");
+        createFileInDirectory(directoryPath, "HEAD", "master");
     }
 
     /**
