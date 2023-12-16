@@ -1,6 +1,7 @@
 package com.project.ngit.Commands;
 
 import com.project.ngit.NgitApplication;
+import com.project.ngit.Utils.Common;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -40,13 +41,13 @@ public class BranchCommand {
         Path ngitPath = repositoryPath.resolve(NGIT_DIR);
         Path headsDir = ngitPath.resolve(HEADS_DIR);
 
-        if (!NgitApplication.directoryExists(headsDir)) {
+        if (!Common.directoryExists(headsDir)) {
             System.out.println("The heads directory does not exist.");
             return;
         }
 
         try {
-            NgitApplication.makeFile(headsDir.toString(), nameOfBranch, "");
+            Common.makeFile(headsDir.toString(), nameOfBranch, "");
         } catch (Exception e) {
             System.out.println("An error occurred while creating a branch.");
         }

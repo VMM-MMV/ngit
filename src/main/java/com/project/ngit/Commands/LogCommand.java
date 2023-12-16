@@ -58,7 +58,6 @@ public class LogCommand {
             Path commitPath = objectsPath.resolve(commitSHA.substring(0, 2)).resolve(commitSHA.substring(2));
             CommitStatus commitContents = CommitMaker.loadCommitStatus(Path.of(commitPath.toFile().getAbsolutePath()));
 
-            // Print commit details
             System.out.println(commitContents.content());
             System.out.println(commitContents.message());
             System.out.println(commitContents.creator());

@@ -1,6 +1,7 @@
 package com.project.ngit.Commands;
 
 import com.project.ngit.NgitApplication;
+import com.project.ngit.Utils.Common;
 
 /**
  * The InitCommand class is responsible for initializing a new NGit repository.
@@ -24,12 +25,12 @@ public class InitCommand {
      */
     public void execute() {
         // Create the main .ngit directory which will contain all the repository data
-        NgitApplication.makeFolder(".ngit", repositoryPath);
+        Common.makeFolder(".ngit", repositoryPath);
         // Create the objects directory to store all the git objects like commits, trees, and blobs
-        NgitApplication.makeFolder(".ngit/objects", repositoryPath);
+        Common.makeFolder(".ngit/objects", repositoryPath);
         // Create the index directory to hold information about the current working directory state
-        NgitApplication.makeFolder(".ngit/index", repositoryPath);
+        Common.makeFolder(".ngit/index", repositoryPath);
         // Create the heads directory to keep track of branch pointers
-        NgitApplication.makeFolder(".ngit/heads", repositoryPath);
+        Common.makeFolder(".ngit/heads", repositoryPath);
     }
 }

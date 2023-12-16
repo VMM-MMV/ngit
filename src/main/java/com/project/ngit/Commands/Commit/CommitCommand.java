@@ -3,6 +3,7 @@ package com.project.ngit.Commands.Commit;
 import com.project.ngit.Commands.AddCommand;
 import com.project.ngit.NgitApplication;
 import com.project.ngit.ObjectStatuses.BlobStatus;
+import com.project.ngit.Utils.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ public class CommitCommand {
         this.repositoryPath = repositoryPath;
         this.ngitPath = Paths.get(repositoryPath, ".ngit");
         this.objectsPath = ngitPath.resolve("objects");
-        this.existingData = NgitApplication.readExistingData(ngitPath.resolve("index/changes.ser"));
+        this.existingData = Common.readExistingData(ngitPath.resolve("index/changes.ser"));
     }
 
     /**
@@ -83,6 +84,6 @@ public class CommitCommand {
             }
         }
 
-        NgitApplication.saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
+        Common.saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
     }
 }

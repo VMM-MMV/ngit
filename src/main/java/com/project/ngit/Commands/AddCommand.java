@@ -3,6 +3,7 @@ package com.project.ngit.Commands;
 import com.project.ngit.NgitApplication;
 import com.project.ngit.ObjectStatuses.BlobStatus;
 import com.project.ngit.Hash.SHA;
+import com.project.ngit.Utils.Common;
 
 import java.io.*;
 import java.nio.file.*;
@@ -37,7 +38,7 @@ public class AddCommand {
      * @param argument the argument specifying which files to add; "." indicates all files
      */
     public void execute(String argument) {
-        existingData = NgitApplication.readExistingData(ngitPath.resolve("index/changes.ser"));
+        existingData = Common.readExistingData(ngitPath.resolve("index/changes.ser"));
 
         assert argument != null;
         if (argument.equals(".")) {
@@ -46,7 +47,7 @@ public class AddCommand {
             processSingleFile(argument);
         }
 
-        NgitApplication.saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
+        Common.saveDataToFile(ngitPath.resolve("index/changes.ser"), existingData);
     }
 
     /**
@@ -80,7 +81,7 @@ public class AddCommand {
             return;
         }
 
-        FileTime lastModifiedTime = NgitApplication.getLastModifiedTime(path);
+        FileTime lastModifiedTime = Common.getLastModifiedTime(path);
 
         String gitObjectHash;
 
@@ -112,7 +113,7 @@ public class AddCommand {
         byte[] fileContents = Files.readAllBytes(Paths.get(path));
         byte[] compressedContents = compress(fileContents);
 
-        NgitApplication.makeFile(objectPath, gitObjectName, "");
+        Common.makeFile(objectPath, gitObjectName, "");
 
         String fullPath = String.valueOf(Path.of(objectPath, gitObjectName));
         Files.write(Paths.get(fullPath), compressedContents, StandardOpenOption.CREATE);

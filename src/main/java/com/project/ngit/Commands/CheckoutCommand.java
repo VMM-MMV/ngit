@@ -2,8 +2,8 @@ package com.project.ngit.Commands;
 
 import com.project.ngit.Commands.Commit.CommitMaker;
 import com.project.ngit.Hash.SHA;
-import com.project.ngit.NgitApplication;
 import com.project.ngit.ObjectStatuses.TreeStatus;
+import com.project.ngit.Utils.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class CheckoutCommand {
 
         try {
             if (fileExists(headsPath, hash)) {
-                NgitApplication.makeFile(headsPath.toString(), "HEAD", hash);
+                Common.makeFile(headsPath.toString(), "HEAD", hash);
                 String shaOfCommit = SHA.getStringFromFile(headsPath.resolve(hash).toString());
                 System.out.println(shaOfCommit);
                 var commitInfo = CommitMaker.loadCommitStatus(Path.of(String.valueOf(ngitPath), "objects", shaOfCommit.substring(0, 2), shaOfCommit.substring(2)));
@@ -124,9 +124,9 @@ public class CheckoutCommand {
     private void createFileFromBlob(Path parentDirectory, String name, String shaOfBlobContents) throws IOException {
         Path objectPath = getGitObjectPath(shaOfBlobContents);
         byte[] compressedContents = readCompressedContents(objectPath);
-        byte[] decompressedContents = decompressContents(compressedContents);
+        byte[] decompressedContents = decompressByteContents(compressedContents);
         Path outputFile = parentDirectory.resolve(name);
-        writeToFile(decompressedContents, outputFile);
+        writeBytesToFile(decompressedContents, outputFile);
     }
 
     /**
@@ -156,7 +156,7 @@ public class CheckoutCommand {
      * @param compressedContents the compressed contents of the object
      * @return a byte array containing the decompressed contents
      */
-    private byte[] decompressContents(byte[] compressedContents) {
+    private byte[] decompressByteContents(byte[] compressedContents) {
         Inflater inflater = new Inflater();
         try (ByteArrayInputStream bais = new ByteArrayInputStream(compressedContents);
              InflaterInputStream iis = new InflaterInputStream(bais, inflater);
@@ -181,7 +181,7 @@ public class CheckoutCommand {
      * @param outputFile           the path to the file to write
      * @throws IOException if an I/O error occurs
      */
-    private void writeToFile(byte[] decompressedContents, Path outputFile) throws IOException {
+    private void writeBytesToFile(byte[] decompressedContents, Path outputFile) throws IOException {
         Files.write(outputFile, decompressedContents);
     }
 }
