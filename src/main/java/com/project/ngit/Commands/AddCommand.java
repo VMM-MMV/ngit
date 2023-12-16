@@ -107,14 +107,14 @@ public class AddCommand {
         String gitObjectDirectory = shaOfFile.substring(0, 2);
         String gitObjectName = shaOfFile.substring(2);
 
-        String objectPath = ngitPath + "\\objects\\" + gitObjectDirectory;
+        String objectPath = String.valueOf(Path.of(ngitPath, "objects", gitObjectDirectory));
 
         byte[] fileContents = Files.readAllBytes(Paths.get(path));
         byte[] compressedContents = compress(fileContents);
 
         NgitApplication.makeFile(objectPath, gitObjectName, "");
 
-        String fullPath = objectPath + "\\" + gitObjectName;
+        String fullPath = String.valueOf(Path.of(objectPath, gitObjectName));
         Files.write(Paths.get(fullPath), compressedContents, StandardOpenOption.CREATE);
 
         return shaOfFile;

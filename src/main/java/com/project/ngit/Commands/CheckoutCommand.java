@@ -47,7 +47,8 @@ public class CheckoutCommand {
             if (fileExists(headsPath, hash)) {
                 NgitApplication.makeFile(headsPath.toString(), "HEAD", hash);
                 String shaOfCommit = SHA.getStringFromFile(headsPath.resolve(hash).toString());
-                var commitInfo = CommitMaker.loadCommitStatus(Path.of(ngitPath.resolve("objects").resolve(shaOfCommit.substring(0, 2)).resolve(shaOfCommit.substring(2)).toString()));
+                System.out.println(shaOfCommit);
+                var commitInfo = CommitMaker.loadCommitStatus(Path.of(String.valueOf(ngitPath), "objects", shaOfCommit.substring(0, 2), shaOfCommit.substring(2)));
                 createFoldersRecursively(commitInfo.content(), repositoryPath.toFile());
             } else {
                 createFoldersRecursively(hash, repositoryPath.toFile());
