@@ -113,10 +113,16 @@ public class Common {
         }
     }
 
+    /**
+     * Deletes all files in a directory that are not part of ngit
+     * @param directory The directory from which to delete
+     * @throws IOException In the case there is no such directory
+     */
     public static void deleteAllFiles(File directory) throws IOException {
         if (!directory.isDirectory()) {
             throw new IllegalArgumentException("Input must be a directory");
         }
+
         for (File file : Objects.requireNonNull(directory.listFiles())) {
             boolean notPartOfNgitFolder = !file.toString().contains(".ngit");
             if (file.isFile() && notPartOfNgitFolder) {

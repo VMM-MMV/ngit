@@ -50,8 +50,6 @@ public class CheckoutCommand {
             try {
                 Path possiblePathToCommit = Path.of(String.valueOf(ngitPath), "objects", hash.substring(0, 2));
                 hashInObjectsThereforIsCommit = fileExists(possiblePathToCommit, hash.substring(2));
-                System.out.println(possiblePathToCommit);
-                System.out.println(hash.substring(2));
             } catch (IOException ignored) {}
 
             if (hashInHeadsThereforIsBranch) {
