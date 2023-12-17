@@ -8,8 +8,9 @@ NGit is a version control project based on git, with some of its core features i
    `wget https://github.com/VMM-MMV/ngit/releases/latest/download/Linux.tar.gz`
 2. Untar the compressed folder: 
    `tar -xzvf Linux.tar.gz`
-3. Follow the README inside.
-All:
+3. cd inside `Linux` and follow the README.
+   
+All Commands:
 
    `wget https://github.com/VMM-MMV/ngit/releases/latest/download/Linux.tar.gz`
    
