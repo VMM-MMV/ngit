@@ -12,4 +12,5 @@ NGit is a version control project based on git, with some of its core features i
 All:
 
    `wget -o Linux.tar.gz https://github.com/VMM-MMV/ngit/releases/tag/CLI`
+   
    `tar -xzvf Linux.tar.gz`
