@@ -44,14 +44,30 @@ public class CheckoutCommand {
         Path headsPath = ngitPath.resolve("heads");
 
         try {
-            if (fileExists(headsPath, hash)) {
+            boolean hashInHeadsThereforIsBranch = fileExists(headsPath, hash);
+
+            boolean hashInObjectsThereforIsCommit = false;
+            try {
+                Path possiblePathToCommit = Path.of(String.valueOf(ngitPath), "objects", hash.substring(0, 2));
+                hashInObjectsThereforIsCommit = fileExists(possiblePathToCommit, hash.substring(2));
+                System.out.println(possiblePathToCommit);
+                System.out.println(hash.substring(2));
+            } catch (IOException ignored) {}
+
+            if (hashInHeadsThereforIsBranch) {
                 Common.makeFile(headsPath.toString(), "HEAD", hash);
                 String shaOfCommit = SHA.getStringFromFile(headsPath.resolve(hash).toString());
                 System.out.println(shaOfCommit);
                 var commitInfo = CommitMaker.loadCommitStatus(Path.of(String.valueOf(ngitPath), "objects", shaOfCommit.substring(0, 2), shaOfCommit.substring(2)));
+                Common.deleteAllFiles(repositoryPath.toFile());
                 createFoldersRecursively(commitInfo.content(), repositoryPath.toFile());
-            } else {
+
+            } else if (hashInObjectsThereforIsCommit){
+                Common.deleteAllFiles(repositoryPath.toFile());
                 createFoldersRecursively(hash, repositoryPath.toFile());
+
+            } else {
+                System.out.println("No such branch or commit");
             }
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.error("Error while executing checkout command", e);
