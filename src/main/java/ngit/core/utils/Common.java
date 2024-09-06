@@ -1,8 +1,6 @@
-package com.project.ngit.Utils;
+package ngit.core.utils;
 
-import com.project.ngit.NgitApplication;
-import com.project.ngit.ObjectStatuses.BlobStatus;
-import org.apache.commons.io.FileUtils;
+import ngit.core.statuses.BlobStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -86,7 +86,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>com.project.ngit.NgitApplication</mainClass> <!-- Ensure this is your main class -->
+							<mainClass>ngit.core.NgitApplication</mainClass> <!-- Ensure this is your main class -->
 						</manifest>
 					</archive>
 					<descriptorRefs>

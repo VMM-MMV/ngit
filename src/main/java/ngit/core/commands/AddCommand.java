@@ -1,9 +1,8 @@
-package com.project.ngit.Commands;
+package ngit.core.commands;
 
-import com.project.ngit.NgitApplication;
-import com.project.ngit.ObjectStatuses.BlobStatus;
-import com.project.ngit.Hash.SHA;
-import com.project.ngit.Utils.Common;
+import ngit.core.statuses.BlobStatus;
+import ngit.core.hash.SHA;
+import ngit.core.utils.Common;
 
 import java.io.*;
 import java.nio.file.*;
@@ -83,16 +82,15 @@ public class AddCommand {
 
         FileTime lastModifiedTime = Common.getLastModifiedTime(path);
 
-        String gitObjectHash;
-
         try {
-            gitObjectHash = addBlob(String.valueOf(ngitPath), String.valueOf(path));
+            String gitObjectHash = addBlob(String.valueOf(ngitPath), String.valueOf(path));
+
+            BlobStatus blobStatus = new BlobStatus(path.getFileName().toString(), gitObjectHash, lastModifiedTime.toString());
+            existingData.put(path.toString(), blobStatus);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        BlobStatus blobStatus = new BlobStatus(path.getFileName().toString(), gitObjectHash, lastModifiedTime.toString());
-        existingData.put(path.toString(), blobStatus);
     }
 
     /**

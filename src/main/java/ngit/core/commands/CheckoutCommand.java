@@ -1,9 +1,9 @@
-package com.project.ngit.Commands;
+package ngit.core.commands;
 
-import com.project.ngit.Commands.Commit.CommitMaker;
-import com.project.ngit.Hash.SHA;
-import com.project.ngit.ObjectStatuses.TreeStatus;
-import com.project.ngit.Utils.Common;
+import ngit.core.commands.commit.CommitMaker;
+import ngit.core.hash.SHA;
+import ngit.core.statuses.TreeStatus;
+import ngit.core.utils.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,15 +44,15 @@ public class CheckoutCommand {
         Path headsPath = ngitPath.resolve("heads");
 
         try {
-            boolean hashInHeadsThereforIsBranch = fileExists(headsPath, hash);
+            boolean hashInHeadsThereforeIsBranch = fileExists(headsPath, hash);
 
-            boolean hashInObjectsThereforIsCommit = false;
+            boolean hashInObjectsThereforeIsCommit = false;
             try {
                 Path possiblePathToCommit = Path.of(String.valueOf(ngitPath), "objects", hash.substring(0, 2));
-                hashInObjectsThereforIsCommit = fileExists(possiblePathToCommit, hash.substring(2));
+                hashInObjectsThereforeIsCommit = fileExists(possiblePathToCommit, hash.substring(2));
             } catch (IOException ignored) {}
 
-            if (hashInHeadsThereforIsBranch) {
+            if (hashInHeadsThereforeIsBranch) {
                 Common.makeFile(headsPath.toString(), "HEAD", hash);
                 String shaOfCommit = SHA.getStringFromFile(headsPath.resolve(hash).toString());
                 System.out.println(shaOfCommit);
@@ -60,7 +60,7 @@ public class CheckoutCommand {
                 Common.deleteAllFiles(repositoryPath.toFile());
                 createFoldersRecursively(commitInfo.content(), repositoryPath.toFile());
 
-            } else if (hashInObjectsThereforIsCommit){
+            } else if (hashInObjectsThereforeIsCommit){
                 Common.deleteAllFiles(repositoryPath.toFile());
                 createFoldersRecursively(hash, repositoryPath.toFile());
 

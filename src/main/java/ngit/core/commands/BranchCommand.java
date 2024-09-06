@@ -1,12 +1,9 @@
-package com.project.ngit.Commands;
+package ngit.core.commands;
 
-import com.project.ngit.NgitApplication;
-import com.project.ngit.Utils.Common;
+import ngit.core.utils.Common;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

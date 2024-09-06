@@ -1,12 +1,11 @@
-package com.project.ngit.Commands;
+package ngit.core.commands;
 
-import com.project.ngit.Commands.Commit.CommitMaker;
-import com.project.ngit.ObjectStatuses.CommitStatus;
-import com.project.ngit.Hash.SHA;
+import ngit.core.commands.commit.CommitMaker;
+import ngit.core.statuses.CommitStatus;
+import ngit.core.hash.SHA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
 import java.nio.file.*;
 
 /**

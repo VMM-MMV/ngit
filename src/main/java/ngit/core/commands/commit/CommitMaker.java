@@ -1,7 +1,7 @@
-package com.project.ngit.Commands.Commit;
+package ngit.core.commands.commit;
 
-import com.project.ngit.ObjectStatuses.CommitStatus;
-import com.project.ngit.Hash.SHA;
+import ngit.core.statuses.CommitStatus;
+import ngit.core.hash.SHA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,18 +1,11 @@
-package com.project.ngit;
+package ngit.core;
 
-import com.project.ngit.Commands.*;
-import com.project.ngit.Commands.Commit.CommitCommand;
-import com.project.ngit.ObjectStatuses.BlobStatus;
+import ngit.core.commands.*;
+import ngit.core.commands.commit.CommitCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The NgitApplication class serves as the entry point for the NGit version control system.

@@ -1,7 +1,6 @@
-package com.project.ngit.Commands;
+package ngit.core.commands;
 
-import com.project.ngit.NgitApplication;
-import com.project.ngit.Utils.Common;
+import ngit.core.utils.Common;
 
 /**
  * The InitCommand class is responsible for initializing a new NGit repository.

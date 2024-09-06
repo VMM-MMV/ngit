@@ -1,9 +1,8 @@
-package com.project.ngit.Commands.Commit;
+package ngit.core.commands.commit;
 
-import com.project.ngit.Commands.AddCommand;
-import com.project.ngit.NgitApplication;
-import com.project.ngit.ObjectStatuses.BlobStatus;
-import com.project.ngit.Utils.Common;
+import ngit.core.commands.AddCommand;
+import ngit.core.statuses.BlobStatus;
+import ngit.core.utils.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,7 @@ public class CommitCommand {
     /**
      * Executes the commit process with the provided commit message.
      * It updates the changed files. Creates a tree structure representing the current index state,
-     * and finally creates a commit object with the given message, and tree stored in it. In this way the tree can be accessed from the commit.
+     * and finally creates a commit object with the given message, and the tree stored in it. In this way the tree can be accessed from the commit.
      *
      * @param commitMessage the message associated with the commit.
      */

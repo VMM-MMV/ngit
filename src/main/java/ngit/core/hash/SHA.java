@@ -1,4 +1,4 @@
-package com.project.ngit.Hash;
+package ngit.core.hash;
 
 import java.io.IOException;
 import java.nio.file.Files;
